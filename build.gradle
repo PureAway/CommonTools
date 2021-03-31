@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version '0.7.2'
+}
+
+group 'com.haier.uhome.plugins'
+version '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version '2020.1.4'
+}
+patchPluginXml {
+    changeNotes """
+     <h2>1.0.0</h2>
+    <ul>
+      <li>initial release</li>
+    </ul>
+    ]]>"""
+}

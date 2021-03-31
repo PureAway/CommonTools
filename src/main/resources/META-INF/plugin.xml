@@ -1,0 +1,33 @@
+<idea-plugin>
+    <id>com.haier.uhome.plugins.CommonTools</id>
+    <name>CommonTools</name>
+    <vendor email="zhuchunyao@haier.com" url="http://www.haier.com">Haier</vendor>
+
+    <description><![CDATA[
+   Some Useful Commands for Flutter、Gradle、ADB, and dart code generator.<br>
+    ]]></description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <defaultLiveTemplatesProvider implementation="com.haier.uhome.plugins.provider.FlutterTemplateProvider"/>
+        <liveTemplateContext implementation="com.haier.uhome.plugins.context.FlutterContext"/>
+        <toolWindow canCloseContents="true" anchor="bottom"
+                    id="CommonCommands" icon="/icons/ic_excavator.svg"
+                    factoryClass="com.haier.uhome.plugins.ui.ConsoleToolFactory">
+        </toolWindow>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="ShowDialogAction" class="com.haier.uhome.plugins.action.ShowDialogAction"
+                text="Common Commands"
+                description="CommonCommands"
+                icon="/icons/commands.svg">
+            <add-to-group group-id="ToolbarRunGroup" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

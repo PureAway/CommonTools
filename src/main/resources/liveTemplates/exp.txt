@@ -1,0 +1,3 @@
+import 'package:syn_base_tools/syn_base_tools.dart';
+
+@ExportPath('$PACKAGE_NAME$')
