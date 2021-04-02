@@ -18,11 +18,16 @@ dependencies {
 intellij {
     version '2020.1.4'
 }
+
+//runIde {
+//    ideDirectory '/Applications/Android Studio.app/Contents'
+//}
+
 patchPluginXml {
     changeNotes """
      <h2>1.0.0</h2>
     <ul>
       <li>initial release</li>
     </ul>
-    ]]>"""
+   """
 }

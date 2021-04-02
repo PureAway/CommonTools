@@ -19,9 +19,6 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
-import kotlin.TypeCastException;
-import kotlin.jvm.internal.Intrinsics;
-import kotlin.jvm.internal.Ref;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -173,24 +170,20 @@ public class Utils {
                     if (command.getName().startsWith("gradle")) {
                         fillCmd = parseGradleCommand(project, command, dirPath);
                     } else {
-                        fillCmd = sdkPath + (space ? ' ' : "/") + command.getCommand();
+                        fillCmd = sdkPath + (space ? " " : "/") + command.getCommand();
                     }
                     log(jTextArea, verticalBar, dirPath + ": " + fillCmd);
-                    BufferedInputStream bufferedErrorStream = null;
-                    BufferedInputStream bufferedInputStream = null;
-                    BufferedReader bufferedErrorReader = null;
-                    BufferedReader bufferedInputReader = null;
                     try {
                         Process process = Runtime.getRuntime().exec(fillCmd, null, new File(dirPath));
-                        bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
-                        bufferedInputStream = new BufferedInputStream(process.getInputStream());
-                        bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "UTF-8")));
-                        bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "UTF-8")));
+                        BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                        BufferedReader bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "utf-8")));
+                        BufferedReader bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "utf-8")));
                         String lineStr;
-                        while ((lineStr = bufferedInputReader.readLine()) != null) {
+                        while (!Utils.isEmptyString(lineStr = bufferedInputReader.readLine())) {
                             log(jTextArea, verticalBar, lineStr);
                         }
-                        while ((lineStr = bufferedErrorReader.readLine()) != null) {
+                        while (!Utils.isEmptyString(lineStr = bufferedErrorReader.readLine())) {
                             log(jTextArea, verticalBar, lineStr);
                         }
                         int code = process.waitFor();
@@ -201,38 +194,14 @@ public class Utils {
                             isBuildRunnerSuccess = false;
                             log(jTextArea, verticalBar, commandName + " Error! Exit with code: " + code);
                         }
+                        bufferedErrorStream.close();
+                        bufferedInputStream.close();
+                        bufferedErrorReader.close();
+                        bufferedInputReader.close();
                     } catch (Throwable e) {
+                        isBuildRunnerSuccess = false;
                         e.printStackTrace();
                         showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
-                    } finally {
-                        if (null != bufferedErrorStream) {
-                            try {
-                                bufferedErrorStream.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if (null != bufferedInputStream) {
-                            try {
-                                bufferedInputStream.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if (null != bufferedErrorReader) {
-                            try {
-                                bufferedErrorReader.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        if (null != bufferedInputReader) {
-                            try {
-                                bufferedInputReader.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
                     }
                 }
 
@@ -268,6 +237,38 @@ public class Utils {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
         return sdf.format(date) + " ";
     }
+
+
+    /**
+     * Checks whether a given filename is an Xcode metadata file, suitable for opening externally.
+     *
+     * @param name the name to check
+     * @return true if an xcode project filename
+     */
+    public static boolean isXcodeFileName(@NotNull String name) {
+        return isXcodeProjectFileName(name) || isXcodeWorkspaceFileName(name);
+    }
+
+    /**
+     * Checks whether a given name is an Xcode workspace filename.
+     *
+     * @param name the name to check
+     * @return true if an xcode workspace filename
+     */
+    public static boolean isXcodeWorkspaceFileName(@NotNull String name) {
+        return name.endsWith(".xcworkspace");
+    }
+
+    /**
+     * Checks whether a given file name is an Xcode project filename.
+     *
+     * @param name the name to check
+     * @return true if an xcode project filename
+     */
+    public static boolean isXcodeProjectFileName(@NotNull String name) {
+        return name.endsWith(".xcodeproj");
+    }
+
 
     private static String parseGradleCommand(Project project, Command command, String dirPath) {
         String rootPath = project.getBasePath();
@@ -308,6 +309,8 @@ public class Utils {
             System.out.println(message);
             jTextArea.append("\n" + message);
             verticalBar.setValue(verticalBar.getMaximum());
+        } else {
+            logger.error("log error");
         }
     }
 

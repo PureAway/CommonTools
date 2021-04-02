@@ -14,14 +14,11 @@ import com.intellij.ui.components.panels.HorizontalLayout;
 import org.jdesktop.swingx.VerticalLayout;
 import org.jetbrains.annotations.NotNull;
 
-import javax.rmi.CORBA.Util;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,15 +42,16 @@ public class CommandForm extends JFrame {
     private final boolean isSYN;
     private String flutterSdkPath;
     private String postGetPath;
+    private final FlutterSdk flutterSdk;
     private KillCommand flutterKillCommand, gradleKillCommand;
 
     public CommandForm(Project currentProject, String virtualDir) {
         project = currentProject;
         path = virtualDir;
-        FlutterSdk flutterSdk = FlutterSdk.getFlutterSdk(project);
+        flutterSdk = FlutterSdk.getFlutterSdk(project);
         ProjectChecker checker = new ProjectChecker();
         isFlutter = checker.checkFlutter(path);
-        String flutterPath = project.getBasePath();
+        String flutterPath = path;
         if (!isFlutter) {
             flutterPath = Utils.findFlutterPath(project, path, checker);
             isFlutter = checker.checkFlutter(flutterPath);
@@ -89,7 +87,7 @@ public class CommandForm extends JFrame {
             public void run() {
                 showData();
             }
-        }, 180);
+        }, 200);
     }
 
 
@@ -204,6 +202,7 @@ public class CommandForm extends JFrame {
         killButton.setToolTipText("点击杀死gradle进程");
         killButton.addActionListener(e -> {
             Utils.killProcess(gradleKillCommand);
+            CommandForm.this.setVisible(false);
         });
         item.add(killButton);
         return item;
@@ -225,6 +224,7 @@ public class CommandForm extends JFrame {
         killButton.setToolTipText("点击杀死flutter进程");
         killButton.addActionListener(e -> {
             Utils.killProcess(flutterKillCommand);
+            CommandForm.this.setVisible(false);
         });
         item.add(killButton);
         return item;
@@ -263,7 +263,7 @@ public class CommandForm extends JFrame {
         JButton copyButton = new JButton();
         copyButton.setPreferredSize(new Dimension(48, 30));
         copyButton.setIcon(copyIcon);
-        copyButton.setToolTipText("点击将会copy命令：" + command.getCommand());
+        copyButton.setToolTipText("点击将会copy命令：" + command.getCmd());
         copyButton.addActionListener(e -> {
             Clipboard systemClipboard = getToolkit().getSystemClipboard();
             Transferable content = new StringSelection(command.getCmd());
@@ -280,9 +280,13 @@ public class CommandForm extends JFrame {
         JButton execButton = new JButton();
         execButton.setPreferredSize(new Dimension(48, 30));
         execButton.setIcon(execIcon);
-        execButton.setToolTipText("点击将会执行命令：" + command.getCommand());
+        execButton.setToolTipText("点击将会执行命令：" + command.getCmd());
         execButton.addActionListener(e -> {
-            Utils.execCommand(project, sdkPath, path, command.isNeedSpace(), command);
+            if (command.getCommand().startsWith("pub get")) {
+                flutterSdk.flutterPackagesGet(path).startInConsole(project);
+            } else {
+                Utils.execCommand(project, sdkPath, path, command.isNeedSpace(), command);
+            }
             CommandForm.this.setVisible(false);
         });
         function.add(execButton);

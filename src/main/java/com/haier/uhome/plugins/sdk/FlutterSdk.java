@@ -98,4 +98,12 @@ public class FlutterSdk {
     }
 
 
+    public FlutterCommand flutterClean(String workDir) {
+        return new FlutterCommand(this, workDir, FlutterCommand.Type.CLEAN);
+    }
+
+    public FlutterCommand flutterPackagesGet(String workDir) {
+        return new FlutterCommand(this, workDir, FlutterCommand.Type.PUB_GET);
+    }
+
 }

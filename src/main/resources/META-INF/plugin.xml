@@ -1,10 +1,10 @@
 <idea-plugin>
     <id>com.haier.uhome.plugins.CommonTools</id>
     <name>CommonTools</name>
-    <vendor email="zhuchunyao@haier.com" url="http://www.haier.com">Haier</vendor>
+    <vendor email="zcy.chunyao@haier.com" url="http://www.haier.com">zcy</vendor>
 
     <description><![CDATA[
-   Some Useful Commands for Flutter、Gradle、ADB, and dart code generator.<br>
+   Some Useful Commands for Flutter、Gradle、ADB, and dart、java code generator.<br>
     ]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
