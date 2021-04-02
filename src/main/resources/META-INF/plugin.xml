@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.haier.uhome.plugins.CommonTools</id>
     <name>CommonTools</name>
-    <vendor email="zcy.chunyao@haier.com" url="http://www.haier.com">zcy</vendor>
+    <vendor email="zcy.chunyao@haier.com" url="https://github.com/PureAway/CommonTools">zcy</vendor>
 
     <description><![CDATA[
    Some Useful Commands for Flutter、Gradle、ADB, and dart、java code generator.<br>
