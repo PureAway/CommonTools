@@ -19,6 +19,10 @@
                     id="CommonCommands" icon="/icons/ic_excavator.svg"
                     factoryClass="com.haier.uhome.plugins.ui.ConsoleToolFactory">
         </toolWindow>
+        <toolWindow canCloseContents="true" anchor="right"
+                    id="HttpClient" icon="/icons/http.svg"
+                    factoryClass="com.haier.uhome.plugins.ui.HttpToolFactory">
+        </toolWindow>
     </extensions>
 
     <actions>
