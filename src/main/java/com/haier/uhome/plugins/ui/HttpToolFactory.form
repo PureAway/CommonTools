@@ -3,9 +3,13 @@
   <grid id="27dc6" binding="rootContent" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="8" y="8" width="953" height="834"/>
+      <xy x="8" y="8" width="767" height="739"/>
     </constraints>
-    <properties/>
+    <properties>
+      <maximumSize width="-1" height="-1"/>
+      <minimumSize width="720" height="640"/>
+      <preferredSize width="720" height="640"/>
+    </properties>
     <border type="none"/>
     <children>
       <component id="65fbe" class="javax.swing.JComboBox" binding="method">
@@ -26,7 +30,7 @@
       <component id="2b69d" class="javax.swing.JTextField" binding="url">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
+            <preferred-size width="100" height="-1"/>
           </grid>
         </constraints>
         <properties>
@@ -43,24 +47,28 @@
       </component>
       <splitpane id="336a0">
         <constraints>
-          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-            <minimum-size width="900" height="720"/>
-            <preferred-size width="900" height="720"/>
-          </grid>
+          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <dividerSize value="2"/>
           <orientation value="0"/>
         </properties>
         <border type="none"/>
         <children>
-          <tabbedpane id="2ba2" binding="requestTab">
+          <tabbedpane id="2ba2">
             <constraints>
               <splitpane position="left"/>
             </constraints>
-            <properties/>
+            <properties>
+              <inheritsPopupMenu value="true"/>
+              <maximumSize width="-1" height="-1"/>
+              <minimumSize width="-1" height="60"/>
+              <opaque value="true"/>
+              <preferredSize width="-1" height="-1"/>
+            </properties>
             <border type="none"/>
             <children>
-              <grid id="c89e3" binding="requestParams" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="c89e3" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <tabbedpane title="Params"/>
@@ -114,34 +122,281 @@
                   </component>
                 </children>
               </grid>
-              <grid id="b6677" binding="requestHeaders" layout-manager="GridBagLayout">
+              <grid id="b6677" layout-manager="GridBagLayout">
                 <constraints>
                   <tabbedpane title="Headers"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
-                <children/>
+                <children>
+                  <component id="eabdc" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="1.0" weighty="0.3"/>
+                    </constraints>
+                    <properties>
+                      <text value="User-Agent"/>
+                    </properties>
+                  </component>
+                  <component id="3b360" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="1.0" weighty="0.3"/>
+                    </constraints>
+                    <properties>
+                      <text value="Content-Type"/>
+                    </properties>
+                  </component>
+                  <component id="773dc" class="javax.swing.JComboBox" binding="uaBox">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="1.0" weighty="0.5"/>
+                    </constraints>
+                    <properties>
+                      <model>
+                        <item value=""/>
+                        <item value="Mozilla/5.0 (Linux; Android 5.1.1; SGP512 Build/23.4.A.0.546) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.133 Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 4.0.4; Galaxy Nexus Build/IMM76B) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.133 Mobile Safari/535.19"/>
+                        <item value="Mozilla/5.0 (Linux; Android 4.4; Nexus 5 Build/_BuildID_) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 5.1.1; Nexus 5 Build/LMY48B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Mobile Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 7.0; Pixel C Build/NRD90M; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.98 Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 6.0.1; SGP771 Build/32.2.A.0.253; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/52.0.2743.98 Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 5.1.1; SHIELD Tablet Build/LMY48C) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Safari/537.36"/>
+                        <item value="Mozilla/5.0 (CrKey armv7l 1.5.16041) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.0 Safari/537.36"/>
+                        <item value="Dalvik/2.1.0 (Linux; U; Android 6.0.1; Nexus Player Build/MMB29T)"/>
+                        <item value="Mozilla/5.0 (Linux; Android 4.2.2; AFTB Build/JDQ39) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.173 Mobile Safari/537.22"/>
+                        <item value="AppleTV5,3/9.1.1"/>
+                        <item value="Mozilla/5.0 (Linux; Android 6.0.1; SM-G920V Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 5.1.1; SM-G928X Build/LMY47X) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 6.0.1; Nexus 6P Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.83 Mobile Safari/537.36"/>
+                        <item value="Mozilla/5.0 (Linux; Android 6.0.1; E6653 Build/32.2.A.0.253) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.98 Mobile Safari/537.36"/>
+                      </model>
+                    </properties>
+                  </component>
+                  <component id="b21e2" class="javax.swing.JComboBox" binding="contentTypeBox">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="1.0" weighty="0.5"/>
+                    </constraints>
+                    <properties>
+                      <model>
+                        <item value=""/>
+                        <item value="*/*"/>
+                        <item value="application/atom+xml"/>
+                        <item value="application/java-archive"/>
+                        <item value="application/json"/>
+                        <item value="application/x-javascript"/>
+                        <item value="application/x-www-form-urlencoded"/>
+                        <item value="application/xhtml+xml"/>
+                        <item value="application/xml"/>
+                        <item value="application/zip"/>
+                        <item value="image/jpeg"/>
+                        <item value="image/png"/>
+                        <item value="img/jpg"/>
+                        <item value="multipart/form-data"/>
+                        <item value="text/css"/>
+                        <item value="text/csv"/>
+                        <item value="text/html"/>
+                        <item value="text/plain"/>
+                        <item value="text/xml"/>
+                      </model>
+                    </properties>
+                  </component>
+                  <scrollpane id="6e01c">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="3" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="3.0" weighty="16.0"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="65b2f" class="javax.swing.JTable" binding="headersTable">
+                        <constraints/>
+                        <properties/>
+                      </component>
+                    </children>
+                  </scrollpane>
+                  <component id="89622" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.6" weighty="0.3"/>
+                    </constraints>
+                    <properties>
+                      <text value="Accept Content-Type"/>
+                    </properties>
+                  </component>
+                  <component id="533e6" class="javax.swing.JComboBox" binding="acceptBox">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.6" weighty="0.5"/>
+                    </constraints>
+                    <properties>
+                      <model>
+                        <item value=""/>
+                        <item value="*/*"/>
+                        <item value="application/atom+xml"/>
+                        <item value="application/java-archive"/>
+                        <item value="application/json"/>
+                        <item value="application/rss+xml"/>
+                        <item value="application/x-javascript"/>
+                        <item value="application/x-www-form-urlencoded"/>
+                        <item value="application/xhtml+xml"/>
+                        <item value="application/xml"/>
+                        <item value="application/zip"/>
+                        <item value="image/jpeg"/>
+                        <item value="image/png"/>
+                        <item value="img/jpg"/>
+                        <item value="multipart/form-data"/>
+                        <item value="text/css"/>
+                        <item value="text/csv"/>
+                        <item value="text/html"/>
+                        <item value="text/json"/>
+                        <item value="text/plain"/>
+                        <item value="text/xml"/>
+                      </model>
+                    </properties>
+                  </component>
+                  <grid id="50e54" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+                    <constraints>
+                      <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="9d39" class="javax.swing.JButton" binding="headersAddBtn">
+                        <constraints/>
+                        <properties>
+                          <text value="+"/>
+                        </properties>
+                      </component>
+                      <component id="bb49d" class="javax.swing.JButton" binding="headersRemoveBtn">
+                        <constraints/>
+                        <properties>
+                          <text value="-"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <hspacer id="802aa">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
+                </children>
               </grid>
-              <grid id="11fcc" binding="requestBody" layout-manager="GridBagLayout">
+              <grid id="11fcc" layout-manager="GridBagLayout">
                 <constraints>
                   <tabbedpane title="Body"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
-                <children/>
+                <children>
+                  <grid id="e9753" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.1" weighty="0.1"/>
+                    </constraints>
+                    <properties>
+                      <alignmentY value="0.0"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <component id="9c6ea" class="javax.swing.JButton" binding="bodyAddBtn">
+                        <constraints/>
+                        <properties>
+                          <text value="+"/>
+                        </properties>
+                      </component>
+                      <component id="e66e8" class="javax.swing.JButton" binding="bodyRemoveBtn">
+                        <constraints/>
+                        <properties>
+                          <text value="-"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <scrollpane id="b1519">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.2" weighty="18.0"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="b860d" class="javax.swing.JTable" binding="bodyTable">
+                        <constraints/>
+                        <properties/>
+                      </component>
+                    </children>
+                  </scrollpane>
+                  <grid id="96ff1" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="0.1" weighty="0.2"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none"/>
+                    <children>
+                      <component id="c4310" class="javax.swing.JRadioButton" binding="formDataRb">
+                        <constraints/>
+                        <properties>
+                          <selected value="true"/>
+                          <text value="form-data"/>
+                        </properties>
+                      </component>
+                      <component id="cf9ae" class="javax.swing.JRadioButton" binding="urlencodedRb">
+                        <constraints/>
+                        <properties>
+                          <text value="x-www-form-urlencoded"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
               </grid>
             </children>
           </tabbedpane>
-          <grid id="476e" binding="responseTab" layout-manager="BorderLayout" hgap="0" vgap="0">
+          <grid id="476e" binding="responseTab" layout-manager="GridBagLayout">
             <constraints>
               <splitpane position="right"/>
             </constraints>
-            <properties/>
+            <properties>
+              <alignmentX value="0.1"/>
+              <inheritsPopupMenu value="false"/>
+              <maximumSize width="-1" height="-1"/>
+              <minimumSize width="-1" height="-1"/>
+              <opaque value="false"/>
+              <preferredSize width="-1" height="-1"/>
+              <requestFocusEnabled value="false"/>
+            </properties>
             <border type="none"/>
             <children>
-              <component id="a4e40" class="javax.swing.JTextArea" binding="textArea1" default-binding="true">
-                <constraints border-constraint="Center"/>
+              <scrollpane id="85d79">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <gridbag weightx="1.0" weighty="20.0"/>
+                </constraints>
                 <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="85c04" class="javax.swing.JTextArea" binding="bodyText">
+                    <constraints/>
+                    <properties/>
+                  </component>
+                </children>
+              </scrollpane>
+              <component id="61bbf" class="javax.swing.JTextArea" binding="code">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="150" height="50"/>
+                  </grid>
+                  <gridbag weightx="1.0" weighty="0.2"/>
+                </constraints>
+                <properties>
+                  <text value="code:"/>
+                </properties>
               </component>
             </children>
           </grid>
