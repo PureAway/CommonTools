@@ -11,11 +11,9 @@ repositories {
 }
 
 dependencies {
-    implementation ('com.fifesoft:rsyntaxtextarea:2.6.1')
+    implementation('com.fifesoft:rsyntaxtextarea:2.6.1')
     implementation('com.squareup.okhttp:okhttp:2.7.5')
-    implementation('commons-io:commons-io:2.6')
-    implementation('org.jsonschema2pojo:jsonschema2pojo-core:0.5.1')
-    implementation('org.simpleframework:simple-xml:2.7.1')
+    implementation('com.google.code.gson:gson:2.8.6')
 }
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
