@@ -3,3 +3,5 @@ An Idea plugin with Some Userful Commands for Flutter、Gradle、ADB，and dart�
 ## plugin preview
 
 <img src="gif/command.gif">
+<img src="gif/httpclient.gif">
+
