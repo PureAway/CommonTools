@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.haier.uhome.plugins'
-version '1.0.0'
+version '1.0.1'
 
 repositories {
     mavenCentral()
@@ -27,6 +27,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+     <h2>1.0.1</h2>
+    <ul>
+      <li>added the http client</li>
+    </ul>
      <h2>1.0.0</h2>
     <ul>
       <li>initial release</li>
