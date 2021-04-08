@@ -10,15 +10,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
-import java.util.regex.Pattern;
 
 public class JSONParser {
 
     private Stack<String> path = new Stack<>();
     private List<String> allNodes = new ArrayList<>();
-    private boolean needGenSample = false;
     private JavaClassGenerator javaClassGenerator;
-    private boolean isArrayToList = false;
+    private boolean isArrayToList = true;
     private boolean genGetter;
     private boolean genSetter;
 
@@ -28,20 +26,16 @@ public class JSONParser {
         javaClassGenerator = new JavaClassGenerator(project, dir);
     }
 
-    public void init(String mainClassName, String pkg, String[] its, boolean isArrayToList) {
+    public void init(String mainClassName, boolean isArrayToList) {
         push(suffixToUppercase(mainClassName));
-        javaClassGenerator.init(pkg, its);
         this.isArrayToList = isArrayToList;
     }
 
-    public void setGenSample(boolean has) {
-        needGenSample = has;
-    }
 
     public String decodeJSONObject(JSONObject json) {
-        String className = null;
+        String className;
         Iterator<String> keys = json.keys();
-        JSONObject current = null;
+        JSONObject current;
         Object value;
         String key;
         String last = "";
@@ -56,19 +50,13 @@ public class JSONParser {
             if (value instanceof JSONObject) {
                 String validName = Utils.getClassName(suffixToUppercase(key));
                 String modifier = getModifier();
-                append(modifier + validName + " " + key + ";\n");
+                append(modifier + validName + " " + key + ";\n", false);
                 push(validName);
                 current = (JSONObject) value;
                 if (current.keySet().size() > 0) {
                     decodeJSONObject(current);
                 } else {
-                    String last1 = "";
-                    if (path.size() > 1) {
-                        last1 = path.get(path.size() - 2);
-                    }
-                    javaClassGenerator.preGen(path.peek(), last1);
-                    append("// TODO: complemented needed maybe.");
-                    Utils.showInfo("Success to generating file " + path.peek() + ".java but it have no field");
+                    generateEmptyClass(false);
                     path.pop();
                 }
             } else if (value instanceof JSONArray) {
@@ -76,14 +64,14 @@ public class JSONParser {
                 if (v.size() > 0 && !(v.get(0) instanceof JSONObject)) {
                     Object firstValue = v.get(0);
                     //处理基本数据类型数组和String数组
-                    String field = getModifier() + getArrayType(decisionValueType(key, firstValue, true), isArrayToList) + " " + key + ";\n";
-                    append(field);
+                    String field = getModifier() + getArrayType(decisionValueType(firstValue, true), isArrayToList) + " " + key + ";\n";
+                    append(field, false);
                 } else {
                     //处理对象数组
                     if (isArrayToList) {
-                        append(getModifier() + "List<" + suffixToUppercase(key) + "Item>" + key + ";\n");
+                        append(getModifier() + "List<" + suffixToUppercase(key) + "Item>" + key + ";\n", false);
                     } else {
-                        append(getModifier() + suffixToUppercase(key) + "Item[] " + key + ";\n");
+                        append(getModifier() + suffixToUppercase(key) + "Item[] " + key + ";\n", false);
                     }
                 }
                 push(suffixToUppercase(key));
@@ -91,23 +79,25 @@ public class JSONParser {
             } else {
                 //处理基本数据类型和String
                 String field = getModifier();
-                field += decisionValueType(key, value, false) + " " + key + ";";
-                if (needGenSample) {
-                    String v = String.valueOf(value);
-                    v = v.replaceAll("\n", "");
-                    if (v.length() > 15) {
-                        v = v.substring(0, 15);
-                    }
-                    field = field + "\t// " + v;
-                }
-                append(field);
+                field += decisionValueType(value, false) + " " + key + ";";
+                append(field, false);
             }
         }
-        Utils.showInfo("Success to generating file " + path.peek() + ".java");
         if (!path.isEmpty()) {
             path.pop();
         }
         return className;
+    }
+
+    private void generateEmptyClass(boolean isArray) {
+        String lasted = "";
+        if (path.size() > 1) {
+            lasted = path.get(path.size() - 2);
+        }
+        String name = path.peek();
+        javaClassGenerator.preGen(isArray ? name + "Item" : name, lasted);
+        append("// TODO: complemented needed maybe.", isArray);
+        Utils.showInfo("Success to generating file " + path.peek() + ".java but it have no field");
     }
 
     private String getModifier() {
@@ -118,7 +108,7 @@ public class JSONParser {
         }
     }
 
-    private String decisionValueType(/*not uesd*/String key, Object value, boolean formArray) {
+    private String decisionValueType(Object value, boolean formArray) {
         if (formArray) {
             return value.getClass().getSimpleName();
         } else {
@@ -135,54 +125,6 @@ public class JSONParser {
         return "String";
     }
 
-    @Deprecated
-    private String __inferValueType(String key, String value, boolean formArray) {
-        String type = "String";
-        if (isNumeric(value)) {
-            if (isInteger(value)) {
-                if (value.length() > 8 || key.contains("Id") || key.contains("id") || key.contains("ID")) {
-                    if (formArray) {
-                        return "Long";
-                    }
-                    return "long";
-                } else {
-                    if (formArray) {
-                        return "Integer";
-                    }
-                    return "int";
-                }
-            } else {
-                String[] tmp = value.split("\\.");
-                int fLength = 0;
-                if (tmp.length > 1) {
-                    fLength = value.split("\\.")[1].length();
-                } else {
-                    Utils.showErrorMessage("Success to generating file " + path.peek() + ".java");
-                }
-
-                if (fLength > 8) {
-                    if (formArray) {
-                        return "Double";
-                    } else {
-                        return "double";
-                    }
-                } else {
-                    if (formArray) {
-                        return "Float";
-                    } else {
-                        return "float";
-                    }
-                }
-            }
-        } else if (value.equals("true") || value.equals("false")) {
-            if (formArray) {
-                return "Boolean";
-            } else {
-                return "boolean";
-            }
-        }
-        return type;
-    }
 
     private String getArrayType(String baseType, boolean isArrayToList) {
         if (isArrayToList) {
@@ -193,6 +135,13 @@ public class JSONParser {
     }
 
     public void decodeJSONArray(JSONArray jsonArray) {
+        if (jsonArray.toArray().length == 0) {
+            generateEmptyClass(true);
+            if (!path.isEmpty()) {
+                path.pop();
+            }
+            return;
+        }
         Object item = jsonArray.get(0);
         if (item instanceof JSONObject) {
             push(path.peek() + "Item");
@@ -200,8 +149,6 @@ public class JSONParser {
         } else if (item instanceof JSONArray) {
             push(path.peek() + "Item");
             decodeJSONArray((JSONArray) item);
-        } else {
-
         }
         if (!path.isEmpty()) {
             path.pop();
@@ -214,19 +161,9 @@ public class JSONParser {
         return sb.toString();
     }
 
-    //正负整数,浮点数
-    public boolean isNumeric(String str) {
-        Pattern pattern = Pattern.compile("-?[0-9]+\\.?[0-9]*");
-        return pattern.matcher(str).matches();
-    }
-
-    private boolean isInteger(String str) {
-        Pattern pattern = Pattern.compile("-?[0-9]+");
-        return pattern.matcher(str).matches();
-    }
-
-    public void append(String field) {
-        javaClassGenerator.append(field, path.peek());
+    public void append(String field, boolean isArray) {
+        String name = path.peek();
+        javaClassGenerator.append(field, isArray ? name + "Item" : name);
     }
 
     private void push(String name) {
@@ -243,17 +180,16 @@ public class JSONParser {
                 }
             }
         }
-
         allNodes.add(uniqueName);
         path.push(uniqueName);
     }
 
-    void setGenGetter(boolean genGetter) {
+    public void setGenGetter(boolean genGetter) {
         this.genGetter = genGetter;
         javaClassGenerator.setGenGetter(genGetter);
     }
 
-    void setGenSetter(boolean genSetter) {
+    public void setGenSetter(boolean genSetter) {
         this.genSetter = genSetter;
         javaClassGenerator.setGenSetter(genSetter);
     }

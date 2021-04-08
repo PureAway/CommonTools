@@ -15,6 +15,11 @@ repositories {
 
 dependencies {
     implementation(name: 'com.springsource.net.sf.json-2.2.2', ext: 'jar')
+    implementation(name: 'com.springsource.org.apache.commons.beanutils-1.7.0', ext: 'jar')
+    implementation(name: 'com.springsource.org.apache.commons.collections-3.2.0', ext: 'jar')
+    implementation(name: 'com.springsource.org.apache.commons.lang-2.1.0', ext: 'jar')
+    implementation(name: 'com.springsource.org.apache.commons.logging-1.1.1', ext: 'jar')
+    implementation(name: 'commons-codec-1.2', ext: 'jar')
     implementation('com.fifesoft:rsyntaxtextarea:2.6.1')
     implementation('com.squareup.okhttp:okhttp:2.7.5')
     implementation('com.google.code.gson:gson:2.8.6')

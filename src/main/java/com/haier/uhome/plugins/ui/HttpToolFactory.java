@@ -1,19 +1,25 @@
 package com.haier.uhome.plugins.ui;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
+import com.haier.uhome.plugins.utils.JSONParser;
 import com.haier.uhome.plugins.utils.Utils;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogBuilder;
+import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.vfs.LocalFileSystem;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.psi.PsiDirectory;
+import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.squareup.okhttp.*;
+import net.sf.json.JSONObject;
 import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
@@ -43,10 +49,7 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -143,10 +146,8 @@ public class HttpToolFactory implements ToolWindowFactory {
                 try {
                     String s = document.getText(0, document.getLength());
                     Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
-                    System.out.println(cb.getData(DataFlavor.stringFlavor));
                     if (s.equals(cb.getData(DataFlavor.stringFlavor))) {
                         URL u = new URL(s);
-                        System.out.println(u.getProtocol());
                         String[] columnNames = new String[]{"Key", "Value"};
                         DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
                         queryTable.setModel(tableModel);
@@ -186,9 +187,9 @@ public class HttpToolFactory implements ToolWindowFactory {
     private void showConvertDialog() {
         final DialogBuilder dialogBuilder = new DialogBuilder();
         Json2ClassForm json2ClassForm = new Json2ClassForm(project);
-        json2ClassForm.setOnGenerateClick((saveLocation, className, isDart, withJson) -> {
+        json2ClassForm.setOnGenerateClick((virtualFile, className, isDart, withJson) -> {
             dialogBuilder.getWindow().dispose();
-            generateClassFile(saveLocation, className, isDart, withJson);
+            generateClassFile(virtualFile, className, isDart, withJson);
         });
         dialogBuilder.setCenterPanel(json2ClassForm.getRootView());
         dialogBuilder.setTitle("Json2Class");
@@ -196,8 +197,38 @@ public class HttpToolFactory implements ToolWindowFactory {
         dialogBuilder.show();
     }
 
-    private void generateClassFile(String saveLocation, String className, boolean isDart, boolean withJson) {
+    private void generateClassFile(VirtualFile virtualFile, String className, boolean isDart, boolean withJson) {
+        if (!isDart) {
+            generateJavaClass(virtualFile, className);
+        } else {
+            generateDartClass(virtualFile, className, withJson);
+        }
+    }
 
+    private void generateDartClass(VirtualFile virtualFile, String className, boolean withJson) {
+
+
+    }
+
+    private void generateJavaClass(VirtualFile virtualFile, String className) {
+        JSONParser parser = new JSONParser();
+        String path = virtualFile.getPath();
+        PsiDirectory directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile);
+        parser.reset(project, directory);
+        parser.init(className, true);
+        parser.setGenGetter(true);
+        parser.setGenSetter(true);
+        JSONObject dist = JSONObject.fromObject(resultJson);
+        String resultName = parser.decodeJSONObject(dist);
+        Messages.showInfoMessage(project, "Generating success!", "Success");
+        File file = new File(path + resultName + ".java");
+        if (file.exists()) {
+            VirtualFile f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
+            if (f != null) {
+                f.refresh(false, true);
+                FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, f), true);
+            }
+        }
     }
 
 
@@ -287,7 +318,6 @@ public class HttpToolFactory implements ToolWindowFactory {
                     rb.addHeader(headersTable.getValueAt(i, 0).toString(), headersTable.getValueAt(i, 1).toString());
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println(e.getMessage());
                 }
             }
             Request request = rb.build();
