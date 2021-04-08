@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.haier.uhome.plugins.utils.Utils;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.DialogBuilder;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.Gray;
@@ -76,6 +77,7 @@ public class HttpToolFactory implements ToolWindowFactory {
     private RTextScrollPane requestPane;
     private RSyntaxTextArea requestText;
     private Project project;
+    private String resultJson = null;
 
 
     @Override
@@ -116,6 +118,8 @@ public class HttpToolFactory implements ToolWindowFactory {
         Gutter gutter2 = bodyPane.getGutter();
         gutter2.setBackground(Gray._47);
 
+        convertButton.addActionListener(e -> showConvertDialog());
+
         SyntaxScheme scheme = bodyText.getSyntaxScheme();
         scheme.getStyle(Token.RESERVED_WORD).background = JBColor.YELLOW;
         scheme.getStyle(Token.RESERVED_WORD_2).background = JBColor.YELLOW;
@@ -148,6 +152,7 @@ public class HttpToolFactory implements ToolWindowFactory {
                         queryTable.setModel(tableModel);
                         queryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                         convertButton.setVisible(false);
+                        resultJson = null;
                         Map<String, String> q = splitQuery(u);
                         for (Map.Entry<String, String> el : q.entrySet()) {
                             ((DefaultTableModel) queryTable.getModel()).addRow(new String[]{el.getKey(), el.getValue()});
@@ -159,7 +164,6 @@ public class HttpToolFactory implements ToolWindowFactory {
                             } catch (BadLocationException e1) {
                                 e1.printStackTrace();
                             }
-
                         });
                     }
                 } catch (BadLocationException | UnsupportedFlavorException | IOException e1) {
@@ -177,6 +181,23 @@ public class HttpToolFactory implements ToolWindowFactory {
 
             }
         });
+    }
+
+    private void showConvertDialog() {
+        final DialogBuilder dialogBuilder = new DialogBuilder();
+        Json2ClassForm json2ClassForm = new Json2ClassForm(project);
+        json2ClassForm.setOnGenerateClick((saveLocation, className, isDart, withJson) -> {
+            dialogBuilder.getWindow().dispose();
+            generateClassFile(saveLocation, className, isDart, withJson);
+        });
+        dialogBuilder.setCenterPanel(json2ClassForm.getRootView());
+        dialogBuilder.setTitle("Json2Class");
+        dialogBuilder.removeAllActions();
+        dialogBuilder.show();
+    }
+
+    private void generateClassFile(String saveLocation, String className, boolean isDart, boolean withJson) {
+
     }
 
 
@@ -319,6 +340,7 @@ public class HttpToolFactory implements ToolWindowFactory {
                                             s = gson.toJson(el);
                                             bodyText.setText((s));
                                             bodyText.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
+                                            resultJson = s;
                                         } else if (response.body().contentType().subtype().equalsIgnoreCase("xml")
                                                 || response.body().contentType().subtype().equalsIgnoreCase("rss+xml")
                                                 || response.body().contentType().subtype().equalsIgnoreCase("smil")) {
@@ -334,6 +356,7 @@ public class HttpToolFactory implements ToolWindowFactory {
                                             String s2 = xmlOutput.getWriter().toString();
                                             bodyText.setText((s2));
                                             bodyText.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
+                                            resultJson = null;
                                         }
                                     } catch (Exception e) {
                                         e.printStackTrace();

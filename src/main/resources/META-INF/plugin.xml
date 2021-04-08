@@ -4,12 +4,32 @@
     <vendor email="zcy.chunyao@gmail.com" url="https://github.com/PureAway/CommonTools">zcy</vendor>
 
     <description><![CDATA[
-   Some Useful Commands for Flutter、Gradle、ADB, and dart、java code generator.<br>
+    <p>Some Useful Commands for Flutter、Gradle、ADB, httpClient and dart、java code generator.</p><br>
+    <p>Flutter command support:
+      • flutter clean.<br>
+      • flutter pub get.<br>
+      • flutter pub run build_runner clean.<br>
+      • flutter pub run build_runner build.<br>
+      • flutter pub run build_runner build --delete-conflicting-outputs.<br>
+      • kill flutter process</p><br>
+     <p>gradlew command support:
+      • gradlew clean.<br>
+      • gradlew assembleRelease.<br>
+      • kill gradle process</p><br>
+     <p>HttpClient tool which support GET、POST、PUT、DELETE method.</p><br>
+     <p>Json2Class tool:
+      • Support get JSON string from HttpClient or user's input.<br>
+      • Support convert JSON string to Dart and Java class.<br>
+      <a href="https://github.com/PureAway/CommonTools">Sourcecode and Tutorial</a><br>
+      <a href="https://github.com/PureAway/CommonTools/issues">Bug report</a></p><br>
+      <br>Hope you enjoy it <br><br>
     ]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->

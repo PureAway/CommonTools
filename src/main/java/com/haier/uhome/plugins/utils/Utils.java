@@ -270,6 +270,20 @@ public class Utils {
     }
 
 
+    public static String getClassName(String name) {
+        char[] chars = name.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (!Character.isLetter(c)) {
+                chars[i] = '_';
+                if (i + 1 < chars.length) {
+                    chars[i + 1] = Character.toUpperCase(chars[i + 1]);
+                }
+            }
+        }
+        return String.valueOf(chars).replaceAll("_", "");
+    }
+
     private static String parseGradleCommand(Project project, Command command, String dirPath) {
         String rootPath = project.getBasePath();
         String[] rootPaths = rootPath.split("/");
