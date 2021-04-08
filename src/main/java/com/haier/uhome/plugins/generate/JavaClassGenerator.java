@@ -184,11 +184,11 @@ public class JavaClassGenerator {
         }
     }
 
-    void setGenGetter(boolean genGetter) {
+    public void setGenGetter(boolean genGetter) {
         this.genGetter = genGetter;
     }
 
-    void setGenSetter(boolean genSetter) {
+    public void setGenSetter(boolean genSetter) {
         this.genSetter = genSetter;
     }
 }

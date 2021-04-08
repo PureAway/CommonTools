@@ -1,7 +1,10 @@
 package com.haier.uhome.plugins.utils;
 
+import com.haier.uhome.plugins.generate.JavaClassGenerator;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDirectory;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,23 +14,23 @@ import java.util.regex.Pattern;
 
 public class JSONParser {
 
-    private Stack<String> path = new Stack<String>();
-    private List<String> allNodes = new ArrayList<String>();
+    private Stack<String> path = new Stack<>();
+    private List<String> allNodes = new ArrayList<>();
     private boolean needGenSample = false;
-    private GeneratorEngine engine;
+    private JavaClassGenerator javaClassGenerator;
     private boolean isArrayToList = false;
     private boolean genGetter;
     private boolean genSetter;
 
-    public void reset(Project proj, PsiDirectory dir) {
+    public void reset(Project project, PsiDirectory dir) {
         path.clear();
         allNodes.clear();
-        engine = new GeneratorEngine(proj, dir);
+        javaClassGenerator = new JavaClassGenerator(project, dir);
     }
 
     public void init(String mainClassName, String pkg, String[] its, boolean isArrayToList) {
         push(suffixToUppercase(mainClassName));
-        engine.init(pkg, its);
+        javaClassGenerator.init(pkg, its);
         this.isArrayToList = isArrayToList;
     }
 
@@ -45,13 +48,13 @@ public class JSONParser {
         if (path.size() > 1) {
             last = path.get(path.size() - 2);
         }
-        className = engine.preGen(path.peek(), last);
+        className = javaClassGenerator.preGen(path.peek(), last);
         while (keys.hasNext()) {
             key = keys.next();
             value = json.get(key);
-            key = ClassNameUtil.getName(key);
+            key = Utils.getClassName(key);
             if (value instanceof JSONObject) {
-                String validName = ClassNameUtil.getName(suffixToUppercase(key));
+                String validName = Utils.getClassName(suffixToUppercase(key));
                 String modifier = getModifier();
                 append(modifier + validName + " " + key + ";\n");
                 push(validName);
@@ -63,9 +66,9 @@ public class JSONParser {
                     if (path.size() > 1) {
                         last1 = path.get(path.size() - 2);
                     }
-                    engine.preGen(path.peek(), last1);
+                    javaClassGenerator.preGen(path.peek(), last1);
                     append("// TODO: complemented needed maybe.");
-                    Logger.warn("Success to generating file " + path.peek() + ".java but it have no field");
+                    Utils.showInfo("Success to generating file " + path.peek() + ".java but it have no field");
                     path.pop();
                 }
             } else if (value instanceof JSONArray) {
@@ -100,8 +103,7 @@ public class JSONParser {
                 append(field);
             }
         }
-
-        Logger.info("Success to generating file " + path.peek() + ".java");
+        Utils.showInfo("Success to generating file " + path.peek() + ".java");
         if (!path.isEmpty()) {
             path.pop();
         }
@@ -155,7 +157,7 @@ public class JSONParser {
                 if (tmp.length > 1) {
                     fLength = value.split("\\.")[1].length();
                 } else {
-                    Logger.error(value);
+                    Utils.showErrorMessage("Success to generating file " + path.peek() + ".java");
                 }
 
                 if (fLength > 8) {
@@ -191,33 +193,16 @@ public class JSONParser {
     }
 
     public void decodeJSONArray(JSONArray jsonArray) {
-
-        //        //是否需要遍历？
-        //        for (item in jsonArray) {
-        //            if (item instanceof JSONObject) {
-        //                push(path.peek() + "Item")
-        //                decodeJSONObject(item)
-        //            } else if (item instanceof JSONArray) {
-        //                push("array" + index + "->")
-        //                decodeJSONArray(item)
-        //            } else {
-        //
-        //            }
-        //        }
-
-        //数组选择其中一个元素出来进行解析就OK
         Object item = jsonArray.get(0);
         if (item instanceof JSONObject) {
             push(path.peek() + "Item");
             decodeJSONObject((JSONObject) item);
         } else if (item instanceof JSONArray) {
-            //多维数组我选择狗带
             push(path.peek() + "Item");
             decodeJSONArray((JSONArray) item);
         } else {
 
         }
-
         if (!path.isEmpty()) {
             path.pop();
         }
@@ -241,11 +226,11 @@ public class JSONParser {
     }
 
     public void append(String field) {
-        engine.append(field, path.peek());
+        javaClassGenerator.append(field, path.peek());
     }
 
     private void push(String name) {
-        String uniqueName = ClassNameUtil.getName(name);
+        String uniqueName = Utils.getClassName(name);
         if (allNodes.contains(name)) {
             uniqueName = path.peek() + name;
         }
@@ -265,12 +250,12 @@ public class JSONParser {
 
     void setGenGetter(boolean genGetter) {
         this.genGetter = genGetter;
-        engine.setGenGetter(genGetter);
+        javaClassGenerator.setGenGetter(genGetter);
     }
 
     void setGenSetter(boolean genSetter) {
         this.genSetter = genSetter;
-        engine.setGenSetter(genSetter);
+        javaClassGenerator.setGenSetter(genSetter);
     }
 
 }
