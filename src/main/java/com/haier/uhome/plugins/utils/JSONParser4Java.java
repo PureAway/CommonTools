@@ -11,7 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-public class JSONParser {
+public class JSONParser4Java {
 
     private Stack<String> path = new Stack<>();
     private List<String> allNodes = new ArrayList<>();
@@ -134,7 +134,7 @@ public class JSONParser {
         }
     }
 
-    public void decodeJSONArray(JSONArray jsonArray) {
+    private void decodeJSONArray(JSONArray jsonArray) {
         if (jsonArray.toArray().length == 0) {
             generateEmptyClass(true);
             if (!path.isEmpty()) {

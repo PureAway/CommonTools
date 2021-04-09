@@ -1,7 +1,8 @@
 package com.haier.uhome.plugins.ui;
 
 import com.google.gson.*;
-import com.haier.uhome.plugins.utils.JSONParser;
+import com.haier.uhome.plugins.utils.JSONParser4Dart;
+import com.haier.uhome.plugins.utils.JSONParser4Java;
 import com.haier.uhome.plugins.utils.Utils;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
@@ -206,12 +207,30 @@ public class HttpToolFactory implements ToolWindowFactory {
     }
 
     private void generateDartClass(VirtualFile virtualFile, String className, boolean withJson) {
-
-
+        JSONParser4Dart parser = new JSONParser4Dart();
+        String path = virtualFile.getPath();
+        PsiDirectory directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile);
+        parser.reset(project, directory);
+        parser.init(className);
+        JSONObject dist = JSONObject.fromObject(resultJson);
+        String resultName = parser.decodeJSONObject(dist);
+        if (null == resultName) {
+            return;
+        }
+        String fileName = Utils.className2DartFileName(resultName);
+        Messages.showInfoMessage(project, "Generating success!", "Success");
+        File file = new File(path + fileName + ".dart");
+        if (file.exists()) {
+            VirtualFile f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
+            if (f != null) {
+                f.refresh(false, true);
+                FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, f), true);
+            }
+        }
     }
 
     private void generateJavaClass(VirtualFile virtualFile, String className) {
-        JSONParser parser = new JSONParser();
+        JSONParser4Java parser = new JSONParser4Java();
         String path = virtualFile.getPath();
         PsiDirectory directory = PsiDirectoryFactory.getInstance(project).createDirectory(virtualFile);
         parser.reset(project, directory);

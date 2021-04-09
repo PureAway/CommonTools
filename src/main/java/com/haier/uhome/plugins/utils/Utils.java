@@ -25,6 +25,7 @@ import javax.swing.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -40,7 +41,6 @@ public class Utils {
                 return sdk;
             }
         }
-
         return null; // no Android SDK found
     }
 
@@ -532,6 +532,22 @@ public class Utils {
             result = false;
         }
         return result;
+    }
+
+    public static String className2DartFileName(String value) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (i != 0 && Pattern.matches("[a-z]",
+                    String.valueOf(value.charAt(i - 1)))
+                    && Pattern.matches("[A-Z]", String.valueOf(c))) {
+                stringBuilder.append("_");
+            }
+            stringBuilder.append(String.valueOf(c).toLowerCase());
+        }
+        return stringBuilder.toString();
+
+
     }
 
     interface ActionListener {

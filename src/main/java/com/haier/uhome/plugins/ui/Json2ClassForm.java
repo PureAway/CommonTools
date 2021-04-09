@@ -11,7 +11,6 @@ import javax.swing.*;
 
 public class Json2ClassForm {
     private JPanel rootView;
-    private JCheckBox withJson;
     private JTextField className;
     private JButton generateButton;
     private JPanel groupContainer;
@@ -41,7 +40,6 @@ public class Json2ClassForm {
         dartBtn.setFocusPainted(false);
         javaBtn.setContentAreaFilled(false);
         javaBtn.setFocusPainted(false);
-        dartBtn.addChangeListener(e -> withJson.setVisible(dartBtn.isSelected()));
         textFieldWithBrowseButton.addActionListener(e -> {
             FileChooserDescriptor fileChooserDescriptor = new FileChooserDescriptor(false, true, false,
                     false, false, false);
@@ -66,7 +64,7 @@ public class Json2ClassForm {
                 return;
             }
             if (onGenerateClick != null) {
-                onGenerateClick.onClick(virtualFile, fileName, dartBtn.isSelected(), withJson.isSelected());
+                onGenerateClick.onClick(virtualFile, fileName, dartBtn.isSelected(), true);
             }
         });
     }

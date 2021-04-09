@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.haier.uhome.plugins'
-version '1.0.3'
+version '1.0.1'
 
 repositories {
     mavenCentral()
@@ -38,14 +38,6 @@ intellij {
 
 patchPluginXml {
     changeNotes """
-    <h2>1.0.3</h2>
-    <ul>
-      <li>finish the json to java class function</li>
-    </ul>
-    <h2>1.0.2</h2>
-    <ul>
-      <li>added the instructions and screenshots</li>
-    </ul>
      <h2>1.0.1</h2>
     <ul>
       <li>added the http client</li>
