@@ -37,7 +37,7 @@ public class JSONParser4Dart {
             return null;
         }
         String name = path.peek();
-        String beginValue = mainClass ? "" : "\n\n";
+        String beginValue = mainClass ? "" : "\n";
         StringBuilder stringBuilder = new StringBuilder(beginValue + "@JsonSerializable()\n");
         stringBuilder.append("class ")
                 .append(name)
@@ -109,7 +109,8 @@ public class JSONParser4Dart {
             builders.add(stringBuilder);
             path.pop();
             if (path.isEmpty() && !builders.isEmpty()) {
-                StringBuilder resultString = new StringBuilder();
+                String lasted = builders.remove(builders.size() - 1).toString();
+                StringBuilder resultString = new StringBuilder(lasted);
                 for (StringBuilder builder : builders) {
                     resultString.append(builder.toString());
                 }
@@ -121,7 +122,7 @@ public class JSONParser4Dart {
 
     private void generateEmptyClass() {
         String name = path.peek();
-        StringBuilder stringBuilder = new StringBuilder("@JsonSerializable()\n");
+        StringBuilder stringBuilder = new StringBuilder("\n");
         stringBuilder.append("class ")
                 .append(name)
                 .append(" {\n")
