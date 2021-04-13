@@ -7,12 +7,16 @@ import com.intellij.ide.fileTemplates.FileTemplateUtil;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.util.IncorrectOperationException;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.*;
 import java.util.*;
 
 public class DartClassGenerator {
@@ -20,7 +24,6 @@ public class DartClassGenerator {
     private PsiFile psiFile;
     private Project project;
     private PsiDirectory directory;
-    private PsiElementFactory factory;
 
     public DartClassGenerator(Project proj, PsiDirectory dir) {
         psiFile = null;
@@ -32,7 +35,21 @@ public class DartClassGenerator {
         ApplicationManager.getApplication().invokeLater(() -> new WriteCommandAction(project) {
             @Override
             protected void run(@NotNull Result result) throws Throwable {
-
+                String path = psiFile.getVirtualFile().getPath();
+                try {
+                    FileWriter fileWritter = new FileWriter(path, true);
+                    BufferedWriter bw = new BufferedWriter(fileWritter);
+                    bw.write(s);
+                    bw.close();
+                    VirtualFile virtualFile = psiFile.getVirtualFile();
+                    if (null != virtualFile) {
+                        Messages.showInfoMessage(project, "Generating success!", "Success");
+                        virtualFile.refresh(false, true);
+                        FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, virtualFile), true);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }.execute());
     }
@@ -56,8 +73,8 @@ public class DartClassGenerator {
         FileTemplate template = FileTemplateManager.getInstance(project).getInternalTemplate("generator_dart");
         Properties defaultProperties = FileTemplateManager.getInstance(project).getDefaultProperties();
         Properties properties = new Properties(defaultProperties);
+        properties.setProperty("NAME", name);
         Iterator iterator = additionalProperties.entrySet().iterator();
-
         while (iterator.hasNext()) {
             Map.Entry<String, String> entry = (Map.Entry) iterator.next();
             properties.setProperty(entry.getKey(), entry.getValue());

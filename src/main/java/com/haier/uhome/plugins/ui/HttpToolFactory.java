@@ -213,18 +213,19 @@ public class HttpToolFactory implements ToolWindowFactory {
         parser.reset(project, directory);
         parser.init(className);
         JSONObject dist = JSONObject.fromObject(resultJson);
-        String resultName = parser.decodeJSONObject(dist);
+        String resultName = parser.decodeJSONObject(dist, true);
         if (null == resultName) {
             return;
         }
         String fileName = Utils.className2DartFileName(resultName);
-        Messages.showInfoMessage(project, "Generating success!", "Success");
+
         File file = new File(path + fileName + ".dart");
         if (file.exists()) {
             VirtualFile f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file);
             if (f != null) {
                 f.refresh(false, true);
                 FileEditorManager.getInstance(project).openTextEditor(new OpenFileDescriptor(project, f), true);
+                FileEditorManager.getInstance(project).openFile(f, true);
             }
         }
     }

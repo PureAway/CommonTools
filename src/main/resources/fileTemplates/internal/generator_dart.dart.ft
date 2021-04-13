@@ -1,5 +1,6 @@
+import 'package:json_annotation/json_annotation.dart';
 
-/**
- * Author: ${USER}
- * Created by: CommonTools on ${DATE}
- */
+part '${NAME}.g.dart';
+
+/// Author: ${USER}
+/// Created by: CommonTools on ${DATE}
