@@ -38,6 +38,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+    <h2>1.0.2</h2>
+    <ul>
+      <li>added the json2class function</li>
+    </ul>
      <h2>1.0.1</h2>
     <ul>
       <li>added the http client</li>
