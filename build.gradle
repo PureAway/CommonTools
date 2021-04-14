@@ -1,17 +1,28 @@
-plugins {
-    id 'java'
-    id 'org.jetbrains.intellij' version '0.7.2'
+buildscript {
+    dependencies {
+        classpath "io.objectbox:objectbox-gradle-plugin:2.9.1"
+    }
 }
 
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij' version('0.7.2')
+}
+
+apply plugin: 'java-library'
+apply plugin: 'io.objectbox'
+
 group 'com.haier.uhome.plugins'
-version '1.0.2'
+version '1.0.3'
 
 repositories {
+    jcenter()
     mavenCentral()
     flatDir {
         dirs 'libs'
     }
 }
+
 
 dependencies {
     implementation(name: 'com.springsource.net.sf.json-2.2.2', ext: 'jar')
@@ -20,7 +31,13 @@ dependencies {
     implementation(name: 'com.springsource.org.apache.commons.lang-2.1.0', ext: 'jar')
     implementation(name: 'com.springsource.org.apache.commons.logging-1.1.1', ext: 'jar')
     implementation(name: 'commons-codec-1.2', ext: 'jar')
-    implementation('com.fifesoft:rsyntaxtextarea:2.6.1')
+    implementation('com.fifesoft:rsyntaxtextarea:3.1.2')
+    implementation('io.objectbox:objectbox-java:2.9.1')
+    implementation('io.objectbox:objectbox-linux:2.9.1')
+    implementation('io.objectbox:objectbox-macos:2.9.1')
+    implementation('io.objectbox:objectbox-windows:2.9.1')
+    implementation "io.objectbox:objectbox-linux-arm64:2.9.1"
+    implementation "io.objectbox:objectbox-linux-armv7:2.9.1"
     implementation('com.squareup.okhttp:okhttp:2.7.5')
     implementation('com.google.code.gson:gson:2.8.6')
     implementation('net.sf.ezmorph:ezmorph:1.0.6')
@@ -38,17 +55,25 @@ intellij {
 
 patchPluginXml {
     changeNotes """
-    <h2>1.0.2</h2>
+    <h1>1.0.3</h1>
+    <ul>
+      <li>added the http/https request history</li>
+    </ul>
+    <h1>1.0.2</h1>
     <ul>
       <li>added the json2class function</li>
     </ul>
-     <h2>1.0.1</h2>
+     <h1>1.0.1</h1>
     <ul>
       <li>added the http client</li>
     </ul>
-     <h2>1.0.0</h2>
+     <h1>1.0.0</h1>
     <ul>
       <li>initial release</li>
     </ul>
    """
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs += [ "-Aobjectbox.modelPath=$projectDir/src/main/resources/objectbox.json" ]
 }

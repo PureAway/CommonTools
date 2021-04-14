@@ -1,9 +1,13 @@
 package com.haier.uhome.plugins.ui;
 
 import com.google.gson.*;
+import com.haier.uhome.plugins.model.MyObjectBox;
+import com.haier.uhome.plugins.model.RequestHistory;
+import com.haier.uhome.plugins.model.RequestHistory_;
 import com.haier.uhome.plugins.utils.JSONParser4Dart;
 import com.haier.uhome.plugins.utils.JSONParser4Java;
 import com.haier.uhome.plugins.utils.Utils;
+import com.intellij.ide.plugins.newui.VerticalLayout;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
@@ -17,9 +21,13 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.components.JBLabel;
+import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import com.squareup.okhttp.*;
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
 import net.sf.json.JSONObject;
 import okio.Buffer;
 import okio.BufferedSink;
@@ -28,8 +36,6 @@ import okio.ByteString;
 import org.apache.http.client.utils.URIBuilder;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
-import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rtextarea.Gutter;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.jetbrains.annotations.NotNull;
@@ -50,14 +56,17 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.List;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 
@@ -80,18 +89,25 @@ public class HttpToolFactory implements ToolWindowFactory {
     private RSyntaxTextArea bodyText;
     private RTextScrollPane requestPane;
     private RSyntaxTextArea requestText;
+    private JPanel history;
+    private JTabbedPane responseTab;
     private Project project;
     private String resultJson = null;
+    private BoxStore store;
+    private Box<RequestHistory> box;
 
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+        store = MyObjectBox.builder().name("request-history-db").build();
+        box = store.boxFor(RequestHistory.class);
         this.project = project;
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
         Content content = contentFactory.createContent(rootContent, "", false);
         toolWindow.getContentManager().addContent(content);
         convertButton.setVisible(false);
         initTables();
+        refreshHistoryList();
         initActionListeners();
         bodyPane.setViewportView(bodyText);
         bodyText.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
@@ -119,27 +135,11 @@ public class HttpToolFactory implements ToolWindowFactory {
         headersRemoveBtn.addActionListener(e -> {
             removeTableRow(headersTable);
         });
-        Gutter gutter2 = bodyPane.getGutter();
-        gutter2.setBackground(Gray._47);
-
+        Gutter gutter = bodyPane.getGutter();
+        gutter.setBackground(Gray._47);
+        gutter = requestPane.getGutter();
+        gutter.setBackground(Gray._47);
         convertButton.addActionListener(e -> showConvertDialog());
-
-        SyntaxScheme scheme = bodyText.getSyntaxScheme();
-        scheme.getStyle(Token.RESERVED_WORD).background = JBColor.YELLOW;
-        scheme.getStyle(Token.RESERVED_WORD_2).background = JBColor.YELLOW;
-        scheme.getStyle(Token.DATA_TYPE).foreground = JBColor.BLUE;
-        scheme.getStyle(Token.LITERAL_NUMBER_HEXADECIMAL).foreground = Color.decode("#FFC66D");
-        scheme.getStyle(Token.IDENTIFIER).foreground = Color.decode("#A9B7C6");
-        scheme.getStyle(Token.FUNCTION).foreground = JBColor.YELLOW;
-        scheme.getStyle(Token.MARKUP_TAG_NAME).foreground = JBColor.YELLOW;
-        scheme.getStyle(Token.SEPARATOR).foreground = Color.decode("#A9B7C6");
-        scheme.getStyle(Token.LITERAL_BOOLEAN).foreground = Color.decode("#CB772F");
-        scheme.getStyle(Token.VARIABLE).foreground = Color.decode("#9876AA");
-        scheme.getStyle(Token.LITERAL_NUMBER_DECIMAL_INT).foreground = Color.decode("#6897BB");
-        scheme.getStyle(Token.LITERAL_NUMBER_FLOAT).foreground = Color.decode("#6897BB");
-        scheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).underline = false;
-        scheme.getStyle(Token.LITERAL_STRING_DOUBLE_QUOTE).foreground = Color.decode("#A5C25C");
-
         url.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -286,6 +286,7 @@ public class HttpToolFactory implements ToolWindowFactory {
             Utils.showErrorNotification(project, "url can not be null");
             return;
         }
+        responseTab.setSelectedIndex(0);
         OkHttpClient client = new OkHttpClient();
         URIBuilder builder = new URIBuilder();
         String scheme = url.getText().split(":")[0].toLowerCase();
@@ -306,7 +307,6 @@ public class HttpToolFactory implements ToolWindowFactory {
         }
         try {
             URI uri = builder.build();
-            System.out.println("Request to: " + uri.toString());
             RequestBody body = null;
             if (methodBox.getSelectedItem().toString().equalsIgnoreCase("POST")) {
                 body = new RequestBody() {
@@ -357,6 +357,19 @@ public class HttpToolFactory implements ToolWindowFactory {
                     if (response.body() != null) {
                         if (responseCode == HTTP_OK) {
                             convertButton.setVisible(true);
+                            RequestHistory requestHistory = new RequestHistory();
+                            requestHistory.method = methodBox.getSelectedItem().toString();
+                            requestHistory.url = url.getText();
+                            requestHistory.queryMaps = getMapValues(queryTable);
+                            requestHistory.headers = getMapValues(headersTable);
+                            requestHistory.bodyJson = requestText.getText();
+                            requestHistory.date = new Date();
+                            RequestHistory queryResult = box.query().equal(RequestHistory_.url, url.getText()).build().findFirst();
+                            if (null != queryResult) {
+                                requestHistory.id = queryResult.id;
+                            }
+                            box.put(requestHistory);
+                            refreshHistoryList();
                         }
                         try {
                             SwingUtilities.invokeAndWait(() -> {
@@ -425,6 +438,104 @@ public class HttpToolFactory implements ToolWindowFactory {
             System.out.println(e.getMessage());
             Utils.showErrorNotification(project, "request error occurred!");
         }
+    }
+
+    private void refreshHistoryList() {
+        List<RequestHistory> historyList = box.getAll();
+        if (null != historyList && !historyList.isEmpty()) {
+            Collections.reverse(historyList);
+            history.removeAll();
+            history.setLayout(new VerticalLayout(2));
+            for (RequestHistory requestHistory : historyList) {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.CHINA);
+                JPanel item = buildItemPanel(requestHistory, simpleDateFormat);
+                history.add(item);
+            }
+        }
+    }
+
+    private JPanel buildItemPanel(RequestHistory requestHistory, SimpleDateFormat simpleDateFormat) {
+        JPanel item = new JPanel();
+        item.setBorder(BorderFactory.createLineBorder(JBColor.GRAY, 1));
+        item.setLayout(new HorizontalLayout(5));
+        JBLabel date = new JBLabel(simpleDateFormat.format(requestHistory.date));
+        JBLabel method = new JBLabel(requestHistory.method);
+        if (requestHistory.method.equalsIgnoreCase("post")) {
+            method.setForeground(JBColor.green);
+        } else if (requestHistory.method.equalsIgnoreCase("get")) {
+            method.setForeground(JBColor.yellow);
+        } else if (requestHistory.method.equalsIgnoreCase("put")) {
+            method.setForeground(JBColor.BLUE);
+        } else if (requestHistory.method.equalsIgnoreCase("delete")) {
+            method.setForeground(JBColor.RED);
+        } else {
+            method.setForeground(JBColor.GRAY);
+        }
+        JBLabel url = new JBLabel(requestHistory.url);
+        item.add(date);
+        item.add(method);
+        item.add(url);
+        item.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                importRequest(requestHistory);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
+        return item;
+    }
+
+    private void importRequest(RequestHistory requestHistory) {
+        System.out.println("ZCY " + requestHistory.toString());
+        initTables();
+        bodyText.setText("");
+        methodBox.setSelectedItem(requestHistory.method.toUpperCase(Locale.CHINA));
+        url.setText(requestHistory.url);
+        if (null != requestHistory.queryMaps) {
+            for (Map.Entry<String, String> entry : requestHistory.queryMaps.entrySet()) {
+                ((DefaultTableModel) queryTable.getModel()).addRow(new String[]{entry.getKey(), entry.getValue()});
+            }
+        }
+        if (null != requestHistory.headers) {
+            for (Map.Entry<String, String> entry : requestHistory.headers.entrySet()) {
+                ((DefaultTableModel) headersTable.getModel()).addRow(new String[]{entry.getKey(), entry.getValue()});
+            }
+        }
+        if (!Utils.isEmptyString(requestHistory.bodyJson)) {
+            bodyText.setText(requestHistory.bodyJson);
+        }
+    }
+
+    private HashMap<String, String> getMapValues(JTable input) {
+        HashMap<String, String> hashMap = new HashMap<>();
+        for (int i = 0; i < input.getRowCount(); i++) {
+            try {
+                hashMap.put(input.getValueAt(i, 0).toString(), input.getValueAt(i, 1).toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println(e.getMessage());
+            }
+        }
+        return hashMap;
     }
 
     private void initTables() {

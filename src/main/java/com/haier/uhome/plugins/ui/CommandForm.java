@@ -104,14 +104,8 @@ public class CommandForm extends JFrame {
                     "pub run build_runner build --delete-conflicting-outputs", "flutter pub run build_runner build --delete-conflicting-outputs"));
         }
 
-        if (Utils.isWindowsOS()) {
-            if (isSYN) {
-                postGetDataList.add(new Command("postget.sh", "postget.sh", "postget.sh").setNeedSpace(false));
-            }
-        } else {
-            if (isSYN) {
-                postGetDataList.add(new Command("postget.sh", "./postget.sh", "./postget.sh").setNeedSpace(false));
-            }
+        if (!Utils.isWindowsOS() && isSYN) {
+            postGetDataList.add(new Command("postget.sh", "./postget.sh", "./postget.sh").setNeedSpace(false));
         }
         if (isGradle) {
             gradlewDataList.add(new Command("gradlew clean", "clean",
