@@ -1,16 +1,7 @@
-buildscript {
-    dependencies {
-        classpath "io.objectbox:objectbox-gradle-plugin:2.9.1"
-    }
-}
-
 plugins {
     id 'java'
     id 'org.jetbrains.intellij' version('0.7.2')
 }
-
-apply plugin: 'java-library'
-apply plugin: 'io.objectbox'
 
 group 'com.haier.uhome.plugins'
 version '1.0.3'
@@ -32,12 +23,9 @@ dependencies {
     implementation(name: 'com.springsource.org.apache.commons.logging-1.1.1', ext: 'jar')
     implementation(name: 'commons-codec-1.2', ext: 'jar')
     implementation('com.fifesoft:rsyntaxtextarea:3.1.2')
-    implementation('io.objectbox:objectbox-java:2.9.1')
-    implementation('io.objectbox:objectbox-linux:2.9.1')
-    implementation('io.objectbox:objectbox-macos:2.9.1')
-    implementation('io.objectbox:objectbox-windows:2.9.1')
-    implementation "io.objectbox:objectbox-linux-arm64:2.9.1"
-    implementation "io.objectbox:objectbox-linux-armv7:2.9.1"
+    implementation('org.greenrobot:essentials:3.1.0')
+    implementation('com.google.flatbuffers:flatbuffers-java:1.12.0')
+    implementation('com.google.code.findbugs:jsr305:3.0.2')
     implementation('com.squareup.okhttp:okhttp:2.7.5')
     implementation('com.google.code.gson:gson:2.8.6')
     implementation('net.sf.ezmorph:ezmorph:1.0.6')
@@ -75,5 +63,5 @@ patchPluginXml {
 }
 
 tasks.withType(JavaCompile) {
-    options.compilerArgs += [ "-Aobjectbox.modelPath=$projectDir/src/main/resources/objectbox.json" ]
+    options.compilerArgs += ["-Aobjectbox.modelPath=$projectDir/src/main/resources/objectbox.json"]
 }

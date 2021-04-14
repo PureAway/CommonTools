@@ -99,7 +99,8 @@ public class HttpToolFactory implements ToolWindowFactory {
 
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        store = MyObjectBox.builder().name("request-history-db").build();
+        File file = new File(project.getWorkspaceFile().getParent().getCanonicalPath());
+        store = MyObjectBox.builder().directory(file).project(project).build();
         box = store.boxFor(RequestHistory.class);
         this.project = project;
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
@@ -505,7 +506,6 @@ public class HttpToolFactory implements ToolWindowFactory {
     }
 
     private void importRequest(RequestHistory requestHistory) {
-        System.out.println("ZCY " + requestHistory.toString());
         initTables();
         bodyText.setText("");
         methodBox.setSelectedItem(requestHistory.method.toUpperCase(Locale.CHINA));
