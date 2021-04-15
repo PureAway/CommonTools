@@ -96,12 +96,15 @@ public class CommandForm extends JFrame {
             flutterDataList.add(new Command("flutter clean", "clean", "flutter clean"));
             flutterDataList.add(new Command("flutter pub get", "pub get", "flutter pub get"));
             flutterDataList.add(new Command("delete lock file", "delete lock file", "delete lock file"));
+            flutterDataList.add(new Command("one key exec", "delete lock file/clean/pub get",
+                    "delete lock file, then exec flutter clean、flutter pub get"));
             flutterDataList.add(new Command("build_runner clean", "pub run build_runner clean",
                     "flutter pub run build_runner clean"));
             flutterDataList.add(new Command("build_runner build",
                     "pub run build_runner build", "flutter pub run build_runner build"));
             flutterDataList.add(new Command("build_runner rebuild",
-                    "pub run build_runner build --delete-conflicting-outputs", "flutter pub run build_runner build --delete-conflicting-outputs"));
+                    "pub run build_runner build --delete-conflicting-outputs",
+                    "flutter pub run build_runner build --delete-conflicting-outputs"));
         }
 
         if (!Utils.isWindowsOS() && isSYN) {
@@ -277,9 +280,13 @@ public class CommandForm extends JFrame {
         execButton.setToolTipText("点击将会执行命令：" + command.getCmd());
         execButton.addActionListener(e -> {
             if (command.getCommand().startsWith("pub get")) {
-                flutterSdk.flutterPackagesGet(path).startInConsole(project);
+                Utils.flutterPubGet(project, sdkPath, path, command, flutterSdk, false);
             } else {
-                Utils.execCommand(project, sdkPath, path, command.isNeedSpace(), command);
+                if (command.getName().startsWith("one")) {
+                    Utils.oneKeyExec(project, sdkPath, path, command, flutterSdk, isSYN);
+                } else {
+                    Utils.execCommand(project, sdkPath, path, command.isNeedSpace(), command);
+                }
             }
             CommandForm.this.setVisible(false);
         });

@@ -120,6 +120,11 @@ public class FlutterCommand {
         return handler;
     }
 
+    public ColoredProcessHandler startNoUIConsole(@NotNull Project project) {
+        return startProcessOrShowError(project);
+    }
+
+
     /**
      * Starts running the command, showing its output in a module console.
      * <p>

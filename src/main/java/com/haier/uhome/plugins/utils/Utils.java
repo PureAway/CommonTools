@@ -3,6 +3,8 @@ package com.haier.uhome.plugins.utils;
 import com.haier.uhome.plugins.checker.ProjectChecker;
 import com.haier.uhome.plugins.model.Command;
 import com.haier.uhome.plugins.model.KillCommand;
+import com.haier.uhome.plugins.sdk.FlutterSdk;
+import com.intellij.execution.process.ColoredProcessHandler;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -30,48 +32,6 @@ import java.util.regex.Pattern;
 public class Utils {
 
     private static final Logger logger = Logger.getInstance(Utils.class);
-
-    /**
-     * Is using Android SDK?
-     */
-    public static Sdk findAndroidSDK() {
-        Sdk[] allJDKs = ProjectJdkTable.getInstance().getAllJdks();
-        for (Sdk sdk : allJDKs) {
-            if (sdk.getSdkType().getName().toLowerCase().contains("android")) {
-                return sdk;
-            }
-        }
-        return null; // no Android SDK found
-    }
-
-
-    /**
-     * Is using Flutter SDK?
-     */
-    public static Sdk findFlutterSDK() {
-        Sdk[] allJDKs = ProjectJdkTable.getInstance().getAllJdks();
-        for (Sdk sdk : allJDKs) {
-            if (sdk.getSdkType().getName().toLowerCase().contains("flutter")) {
-                return sdk;
-            }
-        }
-
-        return null; // no Flutter SDK found
-    }
-
-    /**
-     * Is using Dart SDK?
-     */
-    public static Sdk findDartSDK() {
-        Sdk[] allJDKs = ProjectJdkTable.getInstance().getAllJdks();
-        for (Sdk sdk : allJDKs) {
-            if (sdk.getSdkType().getName().toLowerCase().contains("dart")) {
-                return sdk;
-            }
-        }
-
-        return null; // no Flutter SDK found
-    }
 
     /**
      * Is windows OS
@@ -150,6 +110,243 @@ public class Utils {
     }
 
     private static boolean isBuildRunnerSuccess = false;
+
+    public static void postGet(@NotNull Project project, @NotNull final Command command) {
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands");
+        if (toolWindow != null) {
+            toolWindow.show();
+            JScrollPane jScrollPane = (JScrollPane) toolWindow.getContentManager().getContent(0).getComponent().getComponent(0);
+            JScrollBar verticalBar = jScrollPane.getVerticalScrollBar();
+            JTextArea jTextArea = (JTextArea) jScrollPane.getViewport().getComponent(0);
+            String commandName = command.getName();
+            asyncTask(project, commandName, new ActionListener() {
+                @Override
+                public void onRunning(ProgressIndicator progressIndicator) {
+                    String fillCmd = " ./postget.sh";
+                    log(jTextArea, verticalBar, project.getBasePath() + ": " + fillCmd);
+                    try {
+                        Process process = Runtime.getRuntime().exec(fillCmd, null, new File(project.getBasePath()));
+                        BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                        BufferedReader bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "utf-8")));
+                        BufferedReader bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "utf-8")));
+                        String lineStr;
+                        while (!Utils.isEmptyString(lineStr = bufferedInputReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        while (!Utils.isEmptyString(lineStr = bufferedErrorReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        int code = process.waitFor();
+                        if (code == 0) {
+                            log(jTextArea, verticalBar, "postget Success! Exit with code: " + code);
+                            isBuildRunnerSuccess = true;
+                        } else {
+                            isBuildRunnerSuccess = false;
+                            log(jTextArea, verticalBar, "postget Error! Exit with code: " + code);
+                        }
+                        bufferedErrorStream.close();
+                        bufferedInputStream.close();
+                        bufferedErrorReader.close();
+                        bufferedInputReader.close();
+                    } catch (Throwable e) {
+                        isBuildRunnerSuccess = false;
+                        e.printStackTrace();
+                        System.out.println(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
+                        showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
+                    }
+                }
+
+                @Override
+                public void onSuccess() {
+                    if (isBuildRunnerSuccess) {
+                        showInfo(command.getSuccessMessage());
+                    } else {
+                        showErrorMessage("An exception error occurred during command execution. " +
+                                "Please manually execute and resolve the error before using this plugin.");
+                    }
+                }
+
+                @Override
+                public void onFailed(Throwable error) {
+                    showErrorMessage(command.getErrorMessage() + ", message:" + error.getLocalizedMessage());
+                }
+
+                @Override
+                public void onFinished() {
+                    isBuildRunnerSuccess = false;
+                }
+
+                @Override
+                public void onCancel() {
+                    showInfo("Action canceled!");
+                }
+            });
+        }
+    }
+
+    public static void flutterPubGet(@NotNull Project project, @NotNull String sdkPath,
+                                     @NotNull String dirPath, @NotNull final Command command,
+                                     FlutterSdk flutterSdk, boolean isSYN) {
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands");
+        if (toolWindow != null) {
+            toolWindow.show();
+            JScrollPane jScrollPane = (JScrollPane) toolWindow.getContentManager().getContent(0).getComponent().getComponent(0);
+            JScrollBar verticalBar = jScrollPane.getVerticalScrollBar();
+            JTextArea jTextArea = (JTextArea) jScrollPane.getViewport().getComponent(0);
+            String commandName = command.getName();
+            asyncTask(project, commandName, new ActionListener() {
+                @Override
+                public void onRunning(ProgressIndicator progressIndicator) {
+                    String fillCmd = sdkPath + " pub get";
+                    log(jTextArea, verticalBar, dirPath + ": " + fillCmd);
+                    ColoredProcessHandler handler = flutterSdk.flutterPackagesGet(dirPath).startNoUIConsole(project);
+                    try {
+                        Process process = handler.getProcess();
+                        BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                        BufferedReader bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "utf-8")));
+                        BufferedReader bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "utf-8")));
+                        String lineStr;
+                        while (!Utils.isEmptyString(lineStr = bufferedInputReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        while (!Utils.isEmptyString(lineStr = bufferedErrorReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        int code = process.waitFor();
+                        if (code == 0) {
+                            log(jTextArea, verticalBar, commandName + " Success! Exit with code: " + code);
+                            isBuildRunnerSuccess = true;
+                        } else {
+                            isBuildRunnerSuccess = false;
+                            log(jTextArea, verticalBar, commandName + " Error! Exit with code: " + code);
+                        }
+                        bufferedErrorStream.close();
+                        bufferedInputStream.close();
+                        bufferedErrorReader.close();
+                        bufferedInputReader.close();
+                    } catch (Throwable e) {
+                        isBuildRunnerSuccess = false;
+                        e.printStackTrace();
+                        System.out.println(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
+                        showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
+                    }
+                }
+
+                @Override
+                public void onSuccess() {
+                    if (isBuildRunnerSuccess) {
+                        if (isSYN) {
+                            if (!isWindowsOS()) {
+                                postGet(project, command);
+                            } else {
+                                showInfo(command.getSuccessMessage());
+                            }
+                        } else {
+                            showInfo(command.getSuccessMessage());
+                        }
+                    } else {
+                        showErrorMessage("An exception error occurred during command execution. " +
+                                "Please manually execute and resolve the error before using this plugin.");
+                    }
+                }
+
+                @Override
+                public void onFailed(Throwable error) {
+                    showErrorMessage(command.getErrorMessage() + ", message:" + error.getLocalizedMessage());
+                }
+
+                @Override
+                public void onFinished() {
+
+                }
+
+                @Override
+                public void onCancel() {
+                    showInfo("Action canceled!");
+                }
+            });
+        }
+    }
+
+    public static void oneKeyExec(@NotNull Project project, @NotNull String sdkPath,
+                                  @NotNull String dirPath, @NotNull final Command command, FlutterSdk flutterSdk, boolean isSYN) {
+        if (processDeleteCommand(command, dirPath)) {
+            ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands");
+            if (toolWindow != null) {
+                toolWindow.show();
+                JScrollPane jScrollPane = (JScrollPane) toolWindow.getContentManager().getContent(0).getComponent().getComponent(0);
+                JScrollBar verticalBar = jScrollPane.getVerticalScrollBar();
+                JTextArea jTextArea = (JTextArea) jScrollPane.getViewport().getComponent(0);
+                String commandName = command.getName();
+                asyncTask(project, commandName, new ActionListener() {
+                    @Override
+                    public void onRunning(ProgressIndicator progressIndicator) {
+                        String fillCmd = sdkPath + " clean";
+                        log(jTextArea, verticalBar, dirPath + ": " + fillCmd);
+                        try {
+                            Process process = Runtime.getRuntime().exec(fillCmd, null, new File(dirPath));
+                            BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
+                            BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                            BufferedReader bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "utf-8")));
+                            BufferedReader bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "utf-8")));
+                            String lineStr;
+                            while (!Utils.isEmptyString(lineStr = bufferedInputReader.readLine())) {
+                                log(jTextArea, verticalBar, lineStr);
+                            }
+                            while (!Utils.isEmptyString(lineStr = bufferedErrorReader.readLine())) {
+                                log(jTextArea, verticalBar, lineStr);
+                            }
+                            int code = process.waitFor();
+                            if (code == 0) {
+                                isBuildRunnerSuccess = true;
+                                log(jTextArea, verticalBar, "flutter clean Success! Exit with code: " + code);
+                            } else {
+                                isBuildRunnerSuccess = false;
+                                log(jTextArea, verticalBar, "flutter clean Error! Exit with code: " + code);
+                            }
+                            bufferedErrorStream.close();
+                            bufferedInputStream.close();
+                            bufferedErrorReader.close();
+                            bufferedInputReader.close();
+                        } catch (Throwable e) {
+                            isBuildRunnerSuccess = false;
+                            e.printStackTrace();
+                            showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess() {
+                        if (isBuildRunnerSuccess) {
+                            flutterPubGet(project, sdkPath, dirPath, command, flutterSdk, isSYN);
+                        } else {
+                            showErrorMessage("An exception error occurred during command execution. " +
+                                    "Please manually execute and resolve the error before using this plugin.");
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(Throwable error) {
+                        showErrorMessage(command.getErrorMessage() + ", message:" + error.getLocalizedMessage());
+                    }
+
+                    @Override
+                    public void onFinished() {
+
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        showInfo("Action canceled!");
+                    }
+                });
+            }
+        } else {
+            showErrorMessage("delete lock file failed");
+        }
+    }
 
     public static void execCommand(@NotNull Project project, @NotNull String sdkPath,
                                    @NotNull String dirPath, boolean space, @NotNull final Command command) {
@@ -309,7 +506,7 @@ public class Utils {
     }
 
     private static boolean processDeleteCommand(@NotNull Command command, @NotNull String dirPath) {
-        if (command.getName().startsWith("delete")) {
+        if (command.getName().startsWith("delete") || command.getName().startsWith("one")) {
             isBuildRunnerSuccess = deleteLockFile(dirPath);
             return true;
         }

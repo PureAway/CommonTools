@@ -5,10 +5,14 @@
  */
 package com.haier.uhome.plugins.console;
 
+import com.haier.uhome.plugins.utils.Utils;
 import com.intellij.execution.process.ColoredProcessHandler;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.progress.PerformInBackgroundOption;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.ui.content.Content;
