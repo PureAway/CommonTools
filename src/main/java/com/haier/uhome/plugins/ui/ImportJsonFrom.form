@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.haier.uhome.plugins.ui.ImportJsonFrom">
+  <grid id="27dc6" binding="content" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <splitpane id="36280">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <orientation value="0"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <grid id="ce1bc" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="2">
+            <constraints>
+              <splitpane position="left"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <component id="fbf27" class="javax.swing.JButton" binding="convert">
+                <constraints/>
+                <properties>
+                  <text value="Convert"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="3e0ff" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <splitpane position="right"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <scrollpane id="e3d78" class="org.fife.ui.rtextarea.RTextScrollPane" binding="importPane">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <doubleBuffered value="true"/>
+                  <foldIndicatorEnabled value="false"/>
+                  <iconRowHeaderEnabled value="false"/>
+                  <lineNumbersEnabled value="false"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <component id="ca420" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="importText">
+                    <constraints/>
+                    <properties>
+                      <EOLMarkersVisible value="false"/>
+                      <animateBracketMatching value="true"/>
+                      <background color="-14408668"/>
+                      <bracketMatchingEnabled value="true"/>
+                      <clearWhitespaceLinesEnabled value="true"/>
+                      <closeCurlyBraces value="true"/>
+                      <closeMarkupTags value="true"/>
+                      <codeFoldingEnabled value="true"/>
+                      <fractionalFontMetricsEnabled value="false"/>
+                      <highlightCurrentLine value="false"/>
+                      <highlightSecondaryLanguages value="false"/>
+                      <marginLineEnabled value="false"/>
+                      <markOccurrences value="true"/>
+                      <matchedBracketBGColor color="-1381633"/>
+                      <paintMarkOccurrencesBorder value="true"/>
+                      <paintMatchedBracketPair value="true"/>
+                      <showMatchedBracketPopup value="true"/>
+                      <syntaxEditingStyle value="text/json"/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
+            </children>
+          </grid>
+        </children>
+      </splitpane>
+    </children>
+  </grid>
+</form>

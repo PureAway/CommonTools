@@ -150,7 +150,7 @@ public class CommandForm extends JFrame {
                 addSpace(jbList);
             }
         }
-        if (isSYN) {
+        if (isSYN && !Utils.isWindowsOS()) {
             jbList.add(getCommandTitle("SYN"));
             addSpace(jbList);
             for (Command command : postGetDataList) {

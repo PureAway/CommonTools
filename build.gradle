@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.haier.uhome.plugins'
-version '1.0.4'
+version '1.0.5'
 
 repositories {
     jcenter()
@@ -43,6 +43,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+    <h2>1.0.5</h2>
+    <ul>
+      <li>added the json2class function from the input json</li>
+    </ul>
     <h2>1.0.4</h2>
     <ul>
       <li>added the one key exec command for flutter</li>

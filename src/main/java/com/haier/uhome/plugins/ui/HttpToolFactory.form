@@ -336,6 +336,12 @@
                           <text value="Convert"/>
                         </properties>
                       </component>
+                      <component id="cfc4e" class="javax.swing.JButton" binding="importJson">
+                        <constraints/>
+                        <properties>
+                          <text value="Import"/>
+                        </properties>
+                      </component>
                     </children>
                   </grid>
                   <grid id="aa6b6" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

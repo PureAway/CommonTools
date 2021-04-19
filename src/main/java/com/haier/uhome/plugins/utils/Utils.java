@@ -693,7 +693,7 @@ public class Utils {
             e.printStackTrace();
             throw new UnsupportedOperationException("wmic parsing failed!");
         }
-        return (String[]) pids.toArray();
+        return pids.toArray(new String[pids.size()]);
     }
 
     private static boolean killProcess(String pid) {

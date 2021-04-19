@@ -56,6 +56,8 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.*;
@@ -91,6 +93,7 @@ public class HttpToolFactory implements ToolWindowFactory {
     private RSyntaxTextArea requestText;
     private JPanel history;
     private JTabbedPane responseTab;
+    private JButton importJson;
     private Project project;
     private String resultJson = null;
     private BoxStore store;
@@ -128,6 +131,10 @@ public class HttpToolFactory implements ToolWindowFactory {
 
     private void initActionListeners() {
         send.addActionListener(e -> submitRequest());
+        importJson.addActionListener(e -> {
+            ImportJsonFrom importJsonFrom = new ImportJsonFrom(project);
+            importJsonFrom.setVisible(true);
+        });
         queryAddBtn.addActionListener(e -> addTableRow(queryTable));
         queryRemoveBtn.addActionListener(e -> {
             removeTableRow(queryTable);
