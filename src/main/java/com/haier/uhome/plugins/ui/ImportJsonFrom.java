@@ -3,7 +3,6 @@ package com.haier.uhome.plugins.ui;
 import com.haier.uhome.plugins.utils.JSONParser4Dart;
 import com.haier.uhome.plugins.utils.JSONParser4Java;
 import com.haier.uhome.plugins.utils.Utils;
-import com.intellij.ide.plugins.newui.VerticalLayout;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;

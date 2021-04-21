@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.haier.uhome.plugins.ui.GenerateRequestForm">
+  <grid id="27dc6" binding="content" layout-manager="GridBagLayout">
+    <constraints>
+      <xy x="20" y="20" width="500" height="418"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="51413" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="1.0"/>
+        </constraints>
+        <properties>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
+          <text value="Generate Dart Request With Retrofit"/>
+        </properties>
+      </component>
+      <grid id="61247" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="15.0"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <scrollpane id="e3236" class="org.fife.ui.rtextarea.RTextScrollPane" binding="dartPane">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <doubleBuffered value="true"/>
+              <foldIndicatorEnabled value="false"/>
+              <iconRowHeaderEnabled value="false"/>
+              <lineNumbersEnabled value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="ca640" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="dartText">
+                <constraints/>
+                <properties>
+                  <background color="-14408668"/>
+                  <codeFoldingEnabled value="true"/>
+                  <highlightCurrentLine value="false"/>
+                  <highlightSecondaryLanguages value="false"/>
+                  <lineWrap value="true"/>
+                  <marginLineEnabled value="false"/>
+                  <markAllOnOccurrenceSearches value="true"/>
+                  <markOccurrences value="true"/>
+                  <paintMarkOccurrencesBorder value="true"/>
+                  <paintMatchedBracketPair value="true"/>
+                  <paintTabLines value="false"/>
+                  <showMatchedBracketPopup value="true"/>
+                  <syntaxEditingStyle value="text/json"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
+        </children>
+      </grid>
+      <component id="30992" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="1.0"/>
+        </constraints>
+        <properties>
+          <horizontalAlignment value="0"/>
+          <horizontalTextPosition value="0"/>
+          <text value="Generate Java Request With Retrofit"/>
+          <verticalTextPosition value="0"/>
+        </properties>
+      </component>
+      <grid id="7ef0f" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="15.0"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <scrollpane id="e3d96" class="org.fife.ui.rtextarea.RTextScrollPane" binding="javaPane">
+            <constraints border-constraint="Center"/>
+            <properties>
+              <doubleBuffered value="true"/>
+              <foldIndicatorEnabled value="false"/>
+              <iconRowHeaderEnabled value="false"/>
+              <lineNumbersEnabled value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="ca440" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="javaText">
+                <constraints/>
+                <properties>
+                  <background color="-14408668"/>
+                  <codeFoldingEnabled value="true"/>
+                  <highlightCurrentLine value="false"/>
+                  <highlightSecondaryLanguages value="false"/>
+                  <lineWrap value="true"/>
+                  <marginLineEnabled value="false"/>
+                  <markAllOnOccurrenceSearches value="true"/>
+                  <markOccurrences value="true"/>
+                  <paintMarkOccurrencesBorder value="true"/>
+                  <paintMatchedBracketPair value="true"/>
+                  <paintTabLines value="false"/>
+                  <showMatchedBracketPopup value="true"/>
+                  <syntaxEditingStyle value="text/json"/>
+                </properties>
+              </component>
+            </children>
+          </scrollpane>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

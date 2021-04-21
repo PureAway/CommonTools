@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.haier.uhome.plugins'
-version '1.0.5'
+version '1.0.7'
 
 repositories {
     jcenter()
@@ -43,6 +43,14 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+    <h2>1.0.7</h2>
+    <ul>
+      <li>added the request-generating function with java code</li>
+    </ul>
+    <h2>1.0.6</h2>
+    <ul>
+      <li>added the request-generating function with dart code</li>
+    </ul>
     <h2>1.0.5</h2>
     <ul>
       <li>added the json2class function from the input json</li>

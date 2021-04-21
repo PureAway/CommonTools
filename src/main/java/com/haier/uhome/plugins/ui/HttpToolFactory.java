@@ -21,6 +21,7 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
+import com.intellij.ui.SystemNotifications;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.ui.content.Content;
@@ -56,10 +57,6 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
@@ -85,7 +82,7 @@ public class HttpToolFactory implements ToolWindowFactory {
     private JTable headersTable;
     private JButton headersAddBtn;
     private JButton headersRemoveBtn;
-    private JTextArea code;
+    private JLabel code;
     private JButton convertButton;
     private RTextScrollPane bodyPane;
     private RSyntaxTextArea bodyText;
@@ -94,10 +91,13 @@ public class HttpToolFactory implements ToolWindowFactory {
     private JPanel history;
     private JTabbedPane responseTab;
     private JButton importJson;
+    private JButton generateRequest;
     private Project project;
     private String resultJson = null;
     private BoxStore store;
     private Box<RequestHistory> box;
+    private RequestHistory requestHistory;
+    private String requestUrl;
 
 
     @Override
@@ -110,6 +110,7 @@ public class HttpToolFactory implements ToolWindowFactory {
         Content content = contentFactory.createContent(rootContent, "", false);
         toolWindow.getContentManager().addContent(content);
         convertButton.setVisible(false);
+        generateRequest.setVisible(false);
         initTables();
         refreshHistoryList();
         initActionListeners();
@@ -135,6 +136,10 @@ public class HttpToolFactory implements ToolWindowFactory {
             ImportJsonFrom importJsonFrom = new ImportJsonFrom(project);
             importJsonFrom.setVisible(true);
         });
+        generateRequest.addActionListener(e -> {
+            GenerateRequestForm generateRequestForm = new GenerateRequestForm(requestHistory);
+            generateRequestForm.setVisible(true);
+        });
         queryAddBtn.addActionListener(e -> addTableRow(queryTable));
         queryRemoveBtn.addActionListener(e -> {
             removeTableRow(queryTable);
@@ -154,14 +159,17 @@ public class HttpToolFactory implements ToolWindowFactory {
                 Document document = e.getDocument();
                 try {
                     String s = document.getText(0, document.getLength());
+                    if (requestUrl != null && requestUrl.equals(s)) {
+                        return;
+                    }
                     Clipboard cb = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    initTables();
+                    requestText.setText("");
+                    bodyText.setText("");
                     if (s.equals(cb.getData(DataFlavor.stringFlavor))) {
                         URL u = new URL(s);
-                        String[] columnNames = new String[]{"Key", "Value"};
-                        DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-                        queryTable.setModel(tableModel);
-                        queryTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                         convertButton.setVisible(false);
+                        generateRequest.setVisible(false);
                         resultJson = null;
                         Map<String, String> q = splitQuery(u);
                         for (Map.Entry<String, String> el : q.entrySet()) {
@@ -170,13 +178,17 @@ public class HttpToolFactory implements ToolWindowFactory {
                         SwingUtilities.invokeLater(() -> {
                             try {
                                 document.remove(0, document.getLength());
-                                document.insertString(0, u.getProtocol() + "://" + u.getHost() + u.getPath(), null);
+                                String url = u.getProtocol() + "://" + u.getHost() + u.getPath();
+                                document.insertString(0, url, null);
+                                requestUrl = url;
                             } catch (BadLocationException e1) {
                                 e1.printStackTrace();
                             }
                         });
                     }
-                } catch (BadLocationException | UnsupportedFlavorException | IOException e1) {
+                } catch (BadLocationException
+                        | UnsupportedFlavorException
+                        | IOException e1) {
                     e1.printStackTrace();
                 }
             }
@@ -377,6 +389,8 @@ public class HttpToolFactory implements ToolWindowFactory {
                                 requestHistory.id = queryResult.id;
                             }
                             box.put(requestHistory);
+                            HttpToolFactory.this.requestHistory = requestHistory;
+                            generateRequest.setVisible(true);
                             refreshHistoryList();
                         }
                         try {
@@ -459,6 +473,8 @@ public class HttpToolFactory implements ToolWindowFactory {
                 JPanel item = buildItemPanel(requestHistory, simpleDateFormat);
                 history.add(item);
             }
+        } else {
+            history.removeAll();
         }
     }
 
@@ -479,35 +495,24 @@ public class HttpToolFactory implements ToolWindowFactory {
         } else {
             method.setForeground(JBColor.GRAY);
         }
+        ImageIcon execIcon = new ImageIcon(getClass().getResource("/icons/run.png"));
+        JButton execButton = new JButton();
+        execButton.setPreferredSize(new Dimension(30, 30));
+        execButton.setIcon(execIcon);
+        ImageIcon deleteIcon = new ImageIcon(getClass().getResource("/icons/delete.png"));
+        JButton deleteButton = new JButton();
+        deleteButton.setPreferredSize(new Dimension(30, 30));
+        deleteButton.setIcon(deleteIcon);
         JBLabel url = new JBLabel(requestHistory.url);
         item.add(date);
         item.add(method);
         item.add(url);
-        item.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                importRequest(requestHistory);
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-
-            }
+        item.add(execButton);
+        item.add(deleteButton);
+        execButton.addActionListener(e -> importRequest(requestHistory));
+        deleteButton.addActionListener(e -> {
+            box.remove(requestHistory);
+            refreshHistoryList();
         });
         return item;
     }
@@ -515,6 +520,7 @@ public class HttpToolFactory implements ToolWindowFactory {
     private void importRequest(RequestHistory requestHistory) {
         initTables();
         bodyText.setText("");
+        requestText.setText("");
         methodBox.setSelectedItem(requestHistory.method.toUpperCase(Locale.CHINA));
         url.setText(requestHistory.url);
         if (null != requestHistory.queryMaps) {
@@ -528,7 +534,8 @@ public class HttpToolFactory implements ToolWindowFactory {
             }
         }
         if (!Utils.isEmptyString(requestHistory.bodyJson)) {
-            bodyText.setText(requestHistory.bodyJson);
+            System.out.println("ZCY " + requestHistory.bodyJson);
+            requestText.setText(requestHistory.bodyJson);
         }
     }
 

@@ -324,22 +324,28 @@
                     <properties/>
                     <border type="none"/>
                     <children>
-                      <component id="61bbf" class="javax.swing.JTextArea" binding="code">
+                      <component id="d0287" class="javax.swing.JLabel" binding="code">
                         <constraints/>
                         <properties>
-                          <text value="code:"/>
+                          <text value="code："/>
+                        </properties>
+                      </component>
+                      <component id="f970d" class="javax.swing.JButton" binding="generateRequest">
+                        <constraints/>
+                        <properties>
+                          <text value="GenerateRequest"/>
                         </properties>
                       </component>
                       <component id="60e72" class="javax.swing.JButton" binding="convertButton" default-binding="true">
                         <constraints/>
                         <properties>
-                          <text value="Convert"/>
+                          <text value="Convert2Class"/>
                         </properties>
                       </component>
                       <component id="cfc4e" class="javax.swing.JButton" binding="importJson">
                         <constraints/>
                         <properties>
-                          <text value="Import"/>
+                          <text value="ImportJson"/>
                         </properties>
                       </component>
                     </children>
