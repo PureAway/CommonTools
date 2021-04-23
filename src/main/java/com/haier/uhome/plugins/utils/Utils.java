@@ -10,8 +10,6 @@ import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.projectRoots.ProjectJdkTable;
-import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.ui.popup.Balloon;
@@ -22,6 +20,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.openapi.wm.WindowManager;
 import com.intellij.ui.awt.RelativePoint;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.*;
@@ -32,6 +31,38 @@ import java.util.regex.Pattern;
 public class Utils {
 
     private static final Logger logger = Logger.getInstance(Utils.class);
+
+    public static String gitPath;
+
+    public static void findGitPath(Project project) {
+        if (!isEmptyString(gitPath)) {
+            return;
+        }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                String fillCmd = "";
+                if (isWindowsOS()) {
+                    fillCmd = "where git";
+                } else {
+                    fillCmd = "which git";
+                }
+                Process process = Runtime.getRuntime().exec(fillCmd, null, new File(project.getBasePath()));
+                BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
+                BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                BufferedReader bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "utf-8")));
+                BufferedReader bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "utf-8")));
+                gitPath = bufferedInputReader.readLine();
+                bufferedErrorStream.close();
+                bufferedInputStream.close();
+                bufferedErrorReader.close();
+                bufferedInputReader.close();
+            } catch (Throwable e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+    }
 
     /**
      * Is windows OS
@@ -348,8 +379,166 @@ public class Utils {
         }
     }
 
+    public static void pushTag(@NotNull Project project, @NotNull final String command, @Nullable ExecCallback callback) {
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands");
+        if (toolWindow != null) {
+            toolWindow.show();
+            JScrollPane jScrollPane = (JScrollPane) toolWindow.getContentManager().getContent(0).getComponent().getComponent(0);
+            JScrollBar verticalBar = jScrollPane.getVerticalScrollBar();
+            JTextArea jTextArea = (JTextArea) jScrollPane.getViewport().getComponent(0);
+            String commandName = "Git Push Tag";
+            asyncTask(project, commandName, new ActionListener() {
+                @Override
+                public void onRunning(ProgressIndicator progressIndicator) {
+                    log(jTextArea, verticalBar, project.getBasePath() + ": " + command);
+                    try {
+                        Process process = Runtime.getRuntime().exec(command, null, new File(project.getBasePath()));
+                        BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                        BufferedReader bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "utf-8")));
+                        BufferedReader bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "utf-8")));
+                        String lineStr;
+                        while (!Utils.isEmptyString(lineStr = bufferedInputReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        while (!Utils.isEmptyString(lineStr = bufferedErrorReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        int code = process.waitFor();
+                        if (code == 0) {
+                            if (null != callback) {
+                                callback.onSuccess();
+                            }
+                            isBuildRunnerSuccess = true;
+                            log(jTextArea, verticalBar, commandName + " Success! Exit with code: " + code);
+                        } else {
+                            isBuildRunnerSuccess = false;
+                            if (null != callback) {
+                                callback.onFailed();
+                            }
+                            log(jTextArea, verticalBar, commandName + " Error! Exit with code: " + code);
+                        }
+                        bufferedErrorStream.close();
+                        bufferedInputStream.close();
+                        bufferedErrorReader.close();
+                        bufferedInputReader.close();
+                    } catch (Throwable e) {
+                        isBuildRunnerSuccess = false;
+                        e.printStackTrace();
+                        if (null != callback) {
+                            callback.onFailed();
+                        }
+                        showErrorMessage(command + ", message:" + e.getLocalizedMessage());
+                    }
+                }
+
+                @Override
+                public void onSuccess() {
+                    if (isBuildRunnerSuccess) {
+                        showInfo("Complete!\nRunning " + command + " successfully.");
+                    } else {
+                        showErrorMessage("An exception error occurred during command execution. Please manually execute and resolve the error before using this plugin.");
+                    }
+                }
+
+                @Override
+                public void onFailed(Throwable error) {
+                    showErrorMessage(command + ", message:" + error.getLocalizedMessage());
+                }
+
+                @Override
+                public void onFinished() {
+                    isBuildRunnerSuccess = false;
+                }
+
+                @Override
+                public void onCancel() {
+                    showInfo("Action canceled!");
+                }
+            });
+        }
+    }
+
+
+    public static void gitTag(@NotNull Project project, @NotNull final String command, @Nullable ExecCallback callback) {
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands");
+        if (toolWindow != null) {
+            toolWindow.show();
+            JScrollPane jScrollPane = (JScrollPane) toolWindow.getContentManager().getContent(0).getComponent().getComponent(0);
+            JScrollBar verticalBar = jScrollPane.getVerticalScrollBar();
+            JTextArea jTextArea = (JTextArea) jScrollPane.getViewport().getComponent(0);
+            String commandName = "Git Tag";
+            asyncTask(project, commandName, new ActionListener() {
+                @Override
+                public void onRunning(ProgressIndicator progressIndicator) {
+                    log(jTextArea, verticalBar, project.getBasePath() + ": " + command);
+                    try {
+                        Process process = Runtime.getRuntime().exec(command, null, new File(project.getBasePath()));
+                        BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
+                        BufferedInputStream bufferedInputStream = new BufferedInputStream(process.getInputStream());
+                        BufferedReader bufferedErrorReader = new BufferedReader((new InputStreamReader(bufferedErrorStream, "utf-8")));
+                        BufferedReader bufferedInputReader = new BufferedReader((new InputStreamReader(bufferedInputStream, "utf-8")));
+                        String lineStr;
+                        while (!Utils.isEmptyString(lineStr = bufferedInputReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        while (!Utils.isEmptyString(lineStr = bufferedErrorReader.readLine())) {
+                            log(jTextArea, verticalBar, lineStr);
+                        }
+                        int code = process.waitFor();
+                        if (code == 0) {
+                            isBuildRunnerSuccess = true;
+                            if (null != callback) {
+                                callback.onSuccess();
+                            }
+                            log(jTextArea, verticalBar, commandName + " Success! Exit with code: " + code);
+                        } else {
+                            isBuildRunnerSuccess = false;
+                            if (null != callback) {
+                                callback.onFailed();
+                            }
+                            log(jTextArea, verticalBar, commandName + " Error! Exit with code: " + code);
+                        }
+                        bufferedErrorStream.close();
+                        bufferedInputStream.close();
+                        bufferedErrorReader.close();
+                        bufferedInputReader.close();
+                    } catch (Throwable e) {
+                        if (null != callback) {
+                            callback.onFailed();
+                        }
+                        e.printStackTrace();
+                        showErrorMessage(command + ", message:" + e.getLocalizedMessage());
+                    }
+                }
+
+                @Override
+                public void onSuccess() {
+                    if (!isBuildRunnerSuccess) {
+                        Utils.showErrorMessage(command + "failed, see logs at CommonCommands window.");
+                    }
+                }
+
+                @Override
+                public void onFailed(Throwable error) {
+                    showErrorMessage(command + ", message:" + error.getLocalizedMessage());
+                }
+
+                @Override
+                public void onFinished() {
+                    isBuildRunnerSuccess = false;
+                }
+
+                @Override
+                public void onCancel() {
+                    showInfo("Action canceled!");
+                }
+            });
+        }
+    }
+
     public static void execCommand(@NotNull Project project, @NotNull String sdkPath,
-                                   @NotNull String dirPath, boolean space, @NotNull final Command command) {
+                                   @NotNull String dirPath, boolean space, @NotNull final Command command, @Nullable ExecCallback callback) {
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands");
         if (toolWindow != null) {
             toolWindow.show();
@@ -366,6 +555,8 @@ public class Utils {
                     String fillCmd;
                     if (command.getName().startsWith("gradle")) {
                         fillCmd = parseGradleCommand(project, command, dirPath);
+                    } else if (command.getName().startsWith("git")) {
+                        fillCmd = command.getCommand();
                     } else {
                         fillCmd = sdkPath + (space ? " " : "/") + command.getCommand();
                     }
@@ -385,9 +576,15 @@ public class Utils {
                         }
                         int code = process.waitFor();
                         if (code == 0) {
+                            if (null != callback) {
+                                callback.onSuccess();
+                            }
                             isBuildRunnerSuccess = true;
                             log(jTextArea, verticalBar, commandName + " Success! Exit with code: " + code);
                         } else {
+                            if (null != callback) {
+                                callback.onFailed();
+                            }
                             isBuildRunnerSuccess = false;
                             log(jTextArea, verticalBar, commandName + " Error! Exit with code: " + code);
                         }
@@ -397,6 +594,9 @@ public class Utils {
                         bufferedInputReader.close();
                     } catch (Throwable e) {
                         isBuildRunnerSuccess = false;
+                        if (null != callback) {
+                            callback.onFailed();
+                        }
                         e.printStackTrace();
                         showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
                     }
@@ -427,6 +627,12 @@ public class Utils {
                 }
             });
         }
+    }
+
+
+    public static void execCommand(@NotNull Project project, @NotNull String sdkPath,
+                                   @NotNull String dirPath, boolean space, @NotNull final Command command) {
+        execCommand(project, sdkPath, dirPath, space, command, null);
     }
 
     private static String getCurrentTime() {
@@ -481,7 +687,7 @@ public class Utils {
         return String.valueOf(chars).replaceAll("_", "");
     }
 
-    public static String getFieldName(String name){
+    public static String getFieldName(String name) {
         char[] chars = name.toCharArray();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
@@ -758,8 +964,11 @@ public class Utils {
             stringBuilder.append(String.valueOf(c).toLowerCase());
         }
         return stringBuilder.toString();
+    }
 
-
+    public static boolean isInteger(String str) {
+        Pattern pattern = Pattern.compile("^[-\\+]?[\\d]*$");
+        return pattern.matcher(str).matches();
     }
 
     interface ActionListener {
@@ -773,6 +982,12 @@ public class Utils {
         void onFinished();
 
         void onCancel();
+    }
+
+    public interface ExecCallback {
+        void onSuccess();
+
+        void onFailed();
     }
 
 }

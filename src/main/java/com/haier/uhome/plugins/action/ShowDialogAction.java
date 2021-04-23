@@ -1,6 +1,7 @@
 package com.haier.uhome.plugins.action;
 
 import com.haier.uhome.plugins.ui.CommandForm;
+import com.haier.uhome.plugins.utils.Utils;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.LangDataKeys;
@@ -14,6 +15,7 @@ public class ShowDialogAction extends AnAction {
     public void actionPerformed(@NotNull AnActionEvent e) {
         VirtualFile virtualFile = e.getData(LangDataKeys.VIRTUAL_FILE);
         Project project = e.getProject();
+        Utils.findGitPath(project);
         if (null != project) {
             String path;
             if (null == virtualFile) {

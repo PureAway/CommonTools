@@ -1,6 +1,7 @@
 package com.haier.uhome.plugins.checker;
 
 import com.haier.uhome.plugins.utils.Utils;
+import com.intellij.openapi.project.Project;
 
 import java.io.File;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ public class ProjectChecker implements IChecker {
     private final List<String> gradleCheckFiles = Arrays.asList(".gradle", "gradle", "build.gradle",
             "gradlew", "gradlew.bat", "settings.gradle");
     private final List<String> buildCheckFiles = Arrays.asList("build.gradle");
+    private final List<String> gitFiles = Arrays.asList(".git");
 
     @Override
     public boolean checkFlutter(String path) {
@@ -84,5 +86,20 @@ public class ProjectChecker implements IChecker {
             }
         }
         return count == buildCheckFiles.size();
+    }
+
+    @Override
+    public boolean checkoutGit(Project project) {
+        File dir = new File(project.getBasePath());
+        if (!dir.exists() || !dir.isDirectory() || dir.listFiles() == null) {
+            return false;
+        }
+        int count = 0;
+        for (File file : dir.listFiles()) {
+            if (gitFiles.contains(file.getName())) {
+                count++;
+            }
+        }
+        return count == gitFiles.size();
     }
 }

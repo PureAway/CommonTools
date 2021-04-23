@@ -21,7 +21,6 @@ import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.impl.file.PsiDirectoryFactory;
 import com.intellij.ui.Gray;
 import com.intellij.ui.JBColor;
-import com.intellij.ui.SystemNotifications;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.ui.content.Content;

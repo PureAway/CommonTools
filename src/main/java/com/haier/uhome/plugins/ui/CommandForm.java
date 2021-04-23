@@ -32,6 +32,7 @@ public class CommandForm extends JFrame {
     private final int DEFAULT_HEIGHT = 500;
     private final Dimension defaultSize = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
     private final ArrayList<Command> flutterDataList = new ArrayList<>();
+    private final ArrayList<Command> gitDataList = new ArrayList<>();
     private final ArrayList<Command> postGetDataList = new ArrayList<>();
     private final ArrayList<Command> gradlewDataList = new ArrayList<>();
     private final ArrayList<Command> adbDataList = new ArrayList<>();
@@ -39,6 +40,7 @@ public class CommandForm extends JFrame {
     private String path;
     private boolean isFlutter;
     private boolean isGradle;
+    private boolean isGit;
     private final boolean isSYN;
     private String flutterSdkPath;
     private String postGetPath;
@@ -51,6 +53,7 @@ public class CommandForm extends JFrame {
         flutterSdk = FlutterSdk.getFlutterSdk(project);
         ProjectChecker checker = new ProjectChecker();
         isFlutter = checker.checkFlutter(path);
+        isGit = checker.checkoutGit(project);
         String flutterPath = path;
         if (!isFlutter) {
             flutterPath = Utils.findFlutterPath(project, path, checker);
@@ -106,7 +109,9 @@ public class CommandForm extends JFrame {
                     "pub run build_runner build --delete-conflicting-outputs",
                     "flutter pub run build_runner build --delete-conflicting-outputs"));
         }
-
+        if (isGit) {
+            gitDataList.add(new Command("git tags", "git tags", "git tag"));
+        }
         if (!Utils.isWindowsOS() && isSYN) {
             postGetDataList.add(new Command("postget.sh", "./postget.sh", "./postget.sh").setNeedSpace(false));
         }
@@ -146,6 +151,15 @@ public class CommandForm extends JFrame {
             addSpace(jbList);
             for (Command command : flutterDataList) {
                 JPanel item = buildItemPanel(command, flutterSdkPath);
+                jbList.add(item);
+                addSpace(jbList);
+            }
+        }
+        if (isGit) {
+            jbList.add(getCommandTitle("Git"));
+            addSpace(jbList);
+            for (Command command : gitDataList) {
+                JPanel item = buildItemPanel(command, "");
                 jbList.add(item);
                 addSpace(jbList);
             }
@@ -269,7 +283,7 @@ public class CommandForm extends JFrame {
             CommandForm.this.setVisible(false);
         });
         function.add(copyButton);
-        if (command.getCommand().startsWith("delete")) {
+        if (command.getCommand().startsWith("delete") || command.getName().startsWith("git")) {
             copyButton.setVisible(false);
         }
 
@@ -284,6 +298,10 @@ public class CommandForm extends JFrame {
             } else {
                 if (command.getName().startsWith("one")) {
                     Utils.oneKeyExec(project, sdkPath, path, command, flutterSdk, isSYN);
+                } else if (command.getName().startsWith("git")) {
+                    CommandForm.this.setVisible(false);
+                    GitForm gitForm = new GitForm(project);
+                    gitForm.setVisible(true);
                 } else {
                     Utils.execCommand(project, sdkPath, path, command.isNeedSpace(), command);
                 }

@@ -1,5 +1,7 @@
 package com.haier.uhome.plugins.checker;
 
+import com.intellij.openapi.project.Project;
+
 public interface IChecker {
     /**
      * 检查当前路径是否为flutter工程
@@ -33,4 +35,12 @@ public interface IChecker {
      * @return 校验结果，true 为 通过
      */
     boolean checkBuildFile(String path);
+
+    /**
+     * 检查当前打开的工作目录是否包含.git目录
+     *
+     * @param project 打开的工作目录
+     * @return 校验结果，true 为 通过
+     */
+    boolean checkoutGit(Project project);
 }

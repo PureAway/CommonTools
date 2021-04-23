@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.haier.uhome.plugins'
-version '1.0.7'
+version '1.0.8'
 
 repositories {
     jcenter()
@@ -43,6 +43,10 @@ intellij {
 
 patchPluginXml {
     changeNotes """
+    <h2>1.0.8</h2>
+    <ul>
+      <li>added the git tag commands</li>
+    </ul>
     <h2>1.0.7</h2>
     <ul>
       <li>added the request-generating function with java code</li>
