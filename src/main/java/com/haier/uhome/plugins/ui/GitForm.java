@@ -144,16 +144,18 @@ public class GitForm extends JFrame {
             });
         });
         commit.addActionListener(e -> {
-            StringBuilder command = new StringBuilder("git tag ");
+            ArrayList<String> cmd = new ArrayList<>();
+            cmd.add("git");
+            cmd.add("tag");
             if (Utils.isEmptyString(mStr.getText())) {
-                command.append(nextVersion.getText());
+                cmd.add(nextVersion.getText());
             } else {
-                command.append("-a ")
-                        .append(nextVersion.getText())
-                        .append(" -m ")
-                        .append(mStr.getText());
+                cmd.add("-a");
+                cmd.add(nextVersion.getText());
+                cmd.add("-m");
+                cmd.add(mStr.getText());
             }
-            Utils.gitTag(project, command.toString(), new Utils.ExecCallback() {
+            Utils.gitTag(project, cmd.toArray(new String[0]), new Utils.ExecCallback() {
                 @Override
                 public void onSuccess() {
                     String com = "git push origin " + nextVersion.getText();
@@ -176,7 +178,6 @@ public class GitForm extends JFrame {
 
                 }
             });
-
         });
     }
 

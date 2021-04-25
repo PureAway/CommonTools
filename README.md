@@ -7,4 +7,5 @@ An Idea plugin with Some Userful Commands for Flutter、Gradle、ADB，and dart�
 <img src="gif/request_2.gif">
 <img src="gif/import.gif">
 <img src="gif/generate.gif">
+<img src="gif/git.gif">
 

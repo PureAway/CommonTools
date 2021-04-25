@@ -4,6 +4,7 @@ import com.haier.uhome.plugins.checker.ProjectChecker;
 import com.haier.uhome.plugins.model.Command;
 import com.haier.uhome.plugins.model.KillCommand;
 import com.haier.uhome.plugins.sdk.FlutterSdk;
+import com.haier.uhome.plugins.ui.GitForm;
 import com.intellij.execution.process.ColoredProcessHandler;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.PerformInBackgroundOption;
@@ -33,6 +34,7 @@ public class Utils {
     private static final Logger logger = Logger.getInstance(Utils.class);
 
     public static String gitPath;
+    public static GitForm gitForm;
 
     public static void findGitPath(Project project) {
         if (!isEmptyString(gitPath)) {
@@ -184,7 +186,6 @@ public class Utils {
                         isBuildRunnerSuccess = false;
                         e.printStackTrace();
                         System.out.println(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
-                        showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
                     }
                 }
 
@@ -261,7 +262,6 @@ public class Utils {
                         isBuildRunnerSuccess = false;
                         e.printStackTrace();
                         System.out.println(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
-                        showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
                     }
                 }
 
@@ -344,7 +344,6 @@ public class Utils {
                         } catch (Throwable e) {
                             isBuildRunnerSuccess = false;
                             e.printStackTrace();
-                            showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
                         }
                     }
 
@@ -428,7 +427,6 @@ public class Utils {
                         if (null != callback) {
                             callback.onFailed();
                         }
-                        showErrorMessage(command + ", message:" + e.getLocalizedMessage());
                     }
                 }
 
@@ -460,7 +458,7 @@ public class Utils {
     }
 
 
-    public static void gitTag(@NotNull Project project, @NotNull final String command, @Nullable ExecCallback callback) {
+    public static void gitTag(@NotNull Project project, @NotNull final String[] command, @Nullable ExecCallback callback) {
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands");
         if (toolWindow != null) {
             toolWindow.show();
@@ -471,7 +469,7 @@ public class Utils {
             asyncTask(project, commandName, new ActionListener() {
                 @Override
                 public void onRunning(ProgressIndicator progressIndicator) {
-                    log(jTextArea, verticalBar, project.getBasePath() + ": " + command);
+                    log(jTextArea, verticalBar, project.getBasePath() + ": " + getCommand(command));
                     try {
                         Process process = Runtime.getRuntime().exec(command, null, new File(project.getBasePath()));
                         BufferedInputStream bufferedErrorStream = new BufferedInputStream(process.getErrorStream());
@@ -508,7 +506,6 @@ public class Utils {
                             callback.onFailed();
                         }
                         e.printStackTrace();
-                        showErrorMessage(command + ", message:" + e.getLocalizedMessage());
                     }
                 }
 
@@ -535,6 +532,16 @@ public class Utils {
                 }
             });
         }
+    }
+
+    private static String getCommand(String[] command) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String str : command) {
+            stringBuilder.append(str);
+            stringBuilder.append(" ");
+        }
+        stringBuilder.deleteCharAt(stringBuilder.lastIndexOf(" "));
+        return stringBuilder.toString();
     }
 
     public static void execCommand(@NotNull Project project, @NotNull String sdkPath,
@@ -598,7 +605,6 @@ public class Utils {
                             callback.onFailed();
                         }
                         e.printStackTrace();
-                        showErrorMessage(command.getErrorMessage() + ", message:" + e.getLocalizedMessage());
                     }
                 }
 

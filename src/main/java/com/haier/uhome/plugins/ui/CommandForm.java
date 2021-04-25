@@ -300,8 +300,12 @@ public class CommandForm extends JFrame {
                     Utils.oneKeyExec(project, sdkPath, path, command, flutterSdk, isSYN);
                 } else if (command.getName().startsWith("git")) {
                     CommandForm.this.setVisible(false);
-                    GitForm gitForm = new GitForm(project);
-                    gitForm.setVisible(true);
+                    if (null != Utils.gitForm) {
+                        Utils.gitForm.setVisible(false);
+                        Utils.gitForm = null;
+                    }
+                    Utils.gitForm = new GitForm(project);
+                    Utils.gitForm.setVisible(true);
                 } else {
                     Utils.execCommand(project, sdkPath, path, command.isNeedSpace(), command);
                 }
