@@ -7,6 +7,8 @@ import com.haier.uhome.plugins.sdk.FlutterSdk;
 import com.haier.uhome.plugins.utils.Utils;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBScrollPane;
@@ -40,7 +42,7 @@ public class CommandForm extends JFrame {
     private String path;
     private boolean isFlutter;
     private boolean isGradle;
-    private boolean isGit;
+    private final boolean isGit;
     private final boolean isSYN;
     private String flutterSdkPath;
     private String postGetPath;
@@ -299,9 +301,10 @@ public class CommandForm extends JFrame {
                 if (command.getName().startsWith("one")) {
                     Utils.oneKeyExec(project, sdkPath, path, command, flutterSdk, isSYN);
                 } else if (command.getName().startsWith("git")) {
-                    CommandForm.this.setVisible(false);
-                    GitForm gitForm = new GitForm(project);
-                    gitForm.setVisible(true);
+                    ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow("GitTag");
+                    if (null != toolWindow) {
+                        toolWindow.show();
+                    }
                 } else {
                     Utils.execCommand(project, sdkPath, path, command.isNeedSpace(), command);
                 }

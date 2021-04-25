@@ -49,6 +49,10 @@
                     id="HttpClient" icon="/icons/http.svg"
                     factoryClass="com.haier.uhome.plugins.ui.HttpToolFactory">
         </toolWindow>
+        <toolWindow canCloseContents="true" anchor="right"
+                    id="GitTag" icon="/icons/git.svg"
+                    factoryClass="com.haier.uhome.plugins.ui.GitTagFactory">
+        </toolWindow>
     </extensions>
 
     <actions>

@@ -4,6 +4,11 @@ import com.haier.uhome.plugins.model.Command;
 import com.haier.uhome.plugins.utils.Utils;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.VerticalFlowLayout;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowFactory;
+import com.intellij.ui.content.Content;
+import com.intellij.ui.content.ContentFactory;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,11 +16,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class GitForm extends JFrame {
-    private JPanel content;
+public class GitTagFactory implements ToolWindowFactory {
     private JTextArea nextVersion;
     private JTextArea mStr;
     private JButton commit;
@@ -23,16 +28,8 @@ public class GitForm extends JFrame {
     private JLabel lastTag;
     private JTextArea tagText;
     private JButton pull;
-    private final int DEFAULT_WIDTH = 900;
-    private final int DEFAULT_HEIGHT = 600;
-    private final Dimension defaultSize = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    private JPanel rootContent;
     private String lastVersion;
-
-    public GitForm(Project project) {
-        initView(project);
-        setFullScreenCenter();
-        showTags(project);
-    }
 
     private void showTags(Project project) {
         if (Utils.isEmptyString(Utils.gitPath)) {
@@ -119,10 +116,6 @@ public class GitForm extends JFrame {
     }
 
     private void initView(Project project) {
-        add(content);
-        setTitle("Git Tag");
-        setSize(defaultSize);
-        setMinimumSize(defaultSize);
         rightContainer.setLayout(new VerticalFlowLayout(4));
         Dimension dimension = new Dimension(-1, 36);
         lastTag.setPreferredSize(dimension);
@@ -144,16 +137,18 @@ public class GitForm extends JFrame {
             });
         });
         commit.addActionListener(e -> {
-            StringBuilder command = new StringBuilder("git tag ");
+            ArrayList<String> cmd = new ArrayList<>();
+            cmd.add("git");
+            cmd.add("tag");
             if (Utils.isEmptyString(mStr.getText())) {
-                command.append(nextVersion.getText());
+                cmd.add(nextVersion.getText());
             } else {
-                command.append("-a ")
-                        .append(nextVersion.getText())
-                        .append(" -m ")
-                        .append(mStr.getText());
+                cmd.add("-a");
+                cmd.add(nextVersion.getText());
+                cmd.add("-m");
+                cmd.add(mStr.getText());
             }
-            Utils.gitTag(project, command.toString(), new Utils.ExecCallback() {
+            Utils.gitTag(project, cmd.toArray(new String[0]), new Utils.ExecCallback() {
                 @Override
                 public void onSuccess() {
                     String com = "git push origin " + nextVersion.getText();
@@ -180,9 +175,22 @@ public class GitForm extends JFrame {
         });
     }
 
-    private void setFullScreenCenter() {
-        double width = Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-        double height = Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-        setLocation((int) (width - this.getWidth()) / 2, (int) (height - this.getHeight()) / 2);
+    @Override
+    public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
+        Utils.findGitPath(project, new Utils.ExecCallback() {
+            @Override
+            public void onSuccess() {
+                showTags(project);
+            }
+
+            @Override
+            public void onFailed() {
+
+            }
+        });
+        ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
+        Content content = contentFactory.createContent(rootContent, "", false);
+        toolWindow.getContentManager().addContent(content);
+        initView(project);
     }
 }
