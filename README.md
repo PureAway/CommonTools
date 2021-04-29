@@ -1,5 +1,5 @@
 # CommonTools
-An IntelliJ plugin with Some Useful Commands for Flutter、Git、ADB，and dart、java code generator, it's good for Android and Flutter developer.
+An IntelliJ plugin with Some Useful Commands for Flutter、Git、ADB，and Dart、Java code generator, it's good for Android and Flutter developer.
 ============
 ## Documentation
 
