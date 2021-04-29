@@ -8,8 +8,6 @@
     <p>Flutter command support:<br>
       • flutter clean.<br>
       • flutter pub get.<br>
-      • flutter pub run build_runner clean.<br>
-      • flutter pub run build_runner build.<br>
       • flutter pub run build_runner build --delete-conflicting-outputs.<br>
       • kill flutter process</p><br>
      <p>git command support:<br>

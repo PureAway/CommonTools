@@ -25,7 +25,7 @@ class JavaClassGenerator(project: Project, dir: PsiDirectory) {
                     val dist: PsiClass? = dataSet[clsName]
                     if (s.startsWith("//")) {
                         val comment: PsiElement = factory.createCommentFromText(s, dist)
-                        dist?.addBefore(comment, dist.getRBrace())
+                        dist?.addBefore(comment, dist.rBrace)
                     } else {
                         val r = s.replace("-".toRegex(), "_")
                         val field: PsiField = factory.createFieldFromText(r, dist)
