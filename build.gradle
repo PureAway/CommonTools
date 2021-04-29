@@ -1,10 +1,11 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij' version('0.7.2')
+    id 'org.jetbrains.intellij' version '0.7.3'
+    id 'org.jetbrains.kotlin.jvm' version '1.3.72'
 }
 
-group 'com.haier.uhome.plugins'
-version '1.0.9'
+group 'com.zcy.plugins'
+version '1.0.0'
 
 repositories {
     jcenter()
@@ -13,7 +14,6 @@ repositories {
         dirs 'libs'
     }
 }
-
 
 dependencies {
     implementation(name: 'com.springsource.net.sf.json-2.2.2', ext: 'jar')
@@ -36,56 +36,13 @@ intellij {
     plugins = ['com.intellij.java']
     version '2020.1.4'
 }
-
-//runIde {
-//    ideDirectory '/Applications/Android Studio.app/Contents'
-//}
-
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
 patchPluginXml {
     changeNotes """
-     <h2>1.0.9</h2>
-    <ul>
-      <li>added the git pull action</li>
-    </ul>
-    <h2>1.0.8</h2>
-    <ul>
-      <li>added the git tag commands</li>
-    </ul>
-    <h2>1.0.7</h2>
-    <ul>
-      <li>added the request-generating function with java code</li>
-    </ul>
-    <h2>1.0.6</h2>
-    <ul>
-      <li>added the request-generating function with dart code</li>
-    </ul>
-    <h2>1.0.5</h2>
-    <ul>
-      <li>added the json2class function from the input json</li>
-    </ul>
-    <h2>1.0.4</h2>
-    <ul>
-      <li>added the one key exec command for flutter</li>
-    </ul>
-    <h2>1.0.3</h3>
-    <ul>
-      <li>added the http/https request history</li>
-    </ul>
-    <h2>1.0.2</h2>
-    <ul>
-      <li>added the json2class function</li>
-    </ul>
-     <h2>1.0.1</h2>
-    <ul>
-      <li>added the http client</li>
-    </ul>
-     <h2>1.0.0</h2>
+    <h2>1.0.0</h2>
     <ul>
       <li>initial release</li>
-    </ul>
-   """
-}
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs += ["-Aobjectbox.modelPath=$projectDir/src/main/resources/objectbox.json"]
+    </ul>"""
 }

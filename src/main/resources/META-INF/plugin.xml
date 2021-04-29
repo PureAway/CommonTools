@@ -1,10 +1,10 @@
 <idea-plugin>
-    <id>com.haier.uhome.plugins.CommonTools</id>
+    <id>com.zcy.plugins.CommonTools</id>
     <name>CommonTools</name>
     <vendor email="zcy.chunyao@gmail.com" url="https://github.com/PureAway/CommonTools">zcy</vendor>
 
     <description><![CDATA[
-    <p>Some Useful Commands for Flutter、Gradle、ADB, httpClient and dart、java code generator.</p><br>
+   <p>Some Useful Commands for Flutter、ADB、Git, HttpClient and dart、java code generator.</p><br>
     <p>Flutter command support:<br>
       • flutter clean.<br>
       • flutter pub get.<br>
@@ -12,55 +12,57 @@
       • flutter pub run build_runner build.<br>
       • flutter pub run build_runner build --delete-conflicting-outputs.<br>
       • kill flutter process</p><br>
-     <p>gradlew command support:<br>
-      • gradlew clean.<br>
-      • gradlew assembleRelease.<br>
-      • kill gradle process</p><br>
+     <p>git command support:<br>
+      • git pull --rebase.<br>
+      • git tag.<br>
+      • git push tag to remote</p><br>
      <p>HttpClient tool which support GET、POST、PUT、DELETE method.</p><br>
      <p>Json2Class tool:<br>
       • Support get JSON string from HttpClient or user's input.<br>
       • Support convert JSON string to Dart and Java class.<br>
-      <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_fbfdc5bd-3494-41d9-9577-b216308c81ed" width="600" height="460"></p>
-      <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_4f582895-9dc7-4a39-94ec-5a4c0f3f9f51" width="600" height="520"></p>
-      <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_a911d981-36aa-48f5-be50-9d5d0cb547c8" width="600" height="520"></p>
-      <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_66673d40-17fd-4b5f-9962-2eceee2fb073" width="600" height="520"></p>
-      <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_ed91a3f2-2401-49ed-b3dc-c6811836dc55" width="600" height="520"></p>
-      <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_ce20f490-b431-4f4d-b4e4-e7a014f59a93" width="600" height="520"></p>
-      <a href="https://github.com/PureAway/CommonTools">Sourcecode and Tutorial</a><br>
-      <a href="https://github.com/PureAway/CommonTools/issues">Bug report</a></p><br>
-      <br>Hope you enjoy it.<br><br>
+     <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_fbfdc5bd-3494-41d9-9577-b216308c81ed" width="600" height="460"></p>
+     <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_4f582895-9dc7-4a39-94ec-5a4c0f3f9f51" width="600" height="520"></p>
+     <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_a911d981-36aa-48f5-be50-9d5d0cb547c8" width="600" height="520"></p>
+     <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_66673d40-17fd-4b5f-9962-2eceee2fb073" width="600" height="520"></p>
+     <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_ed91a3f2-2401-49ed-b3dc-c6811836dc55" width="600" height="520"></p>
+     <p><img src="https://plugins.jetbrains.com/files/16449/screenshot_ce20f490-b431-4f4d-b4e4-e7a014f59a93" width="600" height="520"></p>
+     <a href="https://github.com/PureAway/CommonTools">Sourcecode and Tutorial</a><br>
+     <a href="https://github.com/PureAway/CommonTools/issues">Bug report</a></p><br>
+     <br>Hope you enjoy it.<br><br>
     ]]></description>
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
+    <idea-version since-build="201.*"/>
+
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
-        <defaultLiveTemplatesProvider implementation="com.haier.uhome.plugins.provider.FlutterTemplateProvider"/>
-        <liveTemplateContext implementation="com.haier.uhome.plugins.context.FlutterContext"/>
+        <defaultLiveTemplatesProvider implementation="com.zcy.plugins.provider.FlutterTemplateProvider"/>
+        <liveTemplateContext implementation="com.zcy.plugins.context.FlutterContext"/>
         <internalFileTemplate name="generator_common.java"/>
         <toolWindow canCloseContents="true" anchor="bottom"
                     id="CommonCommands" icon="/icons/ic_excavator.svg"
-                    factoryClass="com.haier.uhome.plugins.ui.ConsoleToolFactory">
+                    factoryClass="com.zcy.plugins.ui.ConsoleToolFactory">
         </toolWindow>
         <toolWindow canCloseContents="true" anchor="right"
                     id="HttpClient" icon="/icons/http.svg"
-                    factoryClass="com.haier.uhome.plugins.ui.HttpToolFactory">
+                    factoryClass="com.zcy.plugins.ui.HttpToolFactory">
         </toolWindow>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="ShowDialogAction" class="com.haier.uhome.plugins.action.ShowDialogAction"
+        <action id="ShowCommandDialogAction" class="com.zcy.plugins.action.ShowCommandDialogAction"
                 text="Common Commands"
                 description="CommonCommands"
                 icon="/icons/commands.svg">
             <add-to-group group-id="ToolbarRunGroup" anchor="last"/>
         </action>
-        <action id="HttpTool" class="com.haier.uhome.plugins.action.HttpToolAction" text="HttpClient"
+        <action id="HttpTool" class="com.zcy.plugins.action.HttpToolAction" text="HttpClient"
                 description="HttpClient"
                 icon="/icons/http.svg">
             <add-to-group group-id="ToolbarRunGroup" anchor="last"/>

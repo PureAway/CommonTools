@@ -16,8 +16,8 @@
 
 package io.objectbox.internal;
 
-import com.haier.uhome.plugins.utils.Utils;
 import com.intellij.openapi.project.Project;
+import com.zcy.plugins.utils.Utils;
 import io.objectbox.BoxStore;
 import org.greenrobot.essentials.io.IoUtils;
 
@@ -216,7 +216,7 @@ public class NativeLibraryLoader {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                Utils.showErrorMessage(e.getMessage());
+                System.out.println(e.getMessage());
             }
         }
     }
