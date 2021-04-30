@@ -242,9 +242,10 @@ object Utils {
                 throw UnsupportedOperationException("pgrep returned error value!")
             }
             val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
-            var line: String
-            while (bufferedReader.readLine().also { line = it } != null) {
-                pids.add(line)
+            bufferedReader.readLines().let {
+                it.forEach { str ->
+                    pids.add(str)
+                }
             }
             bufferedReader.close()
         } catch (exception: IOException) {
@@ -295,9 +296,10 @@ object Utils {
             )
             process.waitFor()
             val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
-            var line: String
-            while (bufferedReader.readLine().also { line = it } != null) {
-                pids.add(line)
+            bufferedReader.readLines().let {
+                it.forEach { str ->
+                    pids.add(str)
+                }
             }
             bufferedReader.close()
         } catch (e: IOException) {
