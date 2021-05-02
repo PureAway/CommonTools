@@ -54,7 +54,7 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
     }
 
     init {
-        val flutterSdk :FlutterSdk? = FlutterSdk.getFlutterSdk(project)
+        val flutterSdk: FlutterSdk? = FlutterSdk.getFlutterSdk(project)
         val checker = ProjectChecker()
         isFlutter = checker.checkFlutter(path)
         isGit = checker.checkoutGit(project)
@@ -66,8 +66,8 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         if (isFlutter) {
             path = flutterPath
             flutterKillCommand = KillCommand(
-                "Flutter",
-                "flutter", "commandline name='flutter'"
+                    "Flutter",
+                    "flutter", "commandline name='flutter'"
             )
         }
         isSYN = checker.checkPostGet(project.basePath)
@@ -76,7 +76,7 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         }
         flutterSdk?.let {
             flutterSdkPath =
-                flutterSdk.homePath + if (Utils.isWindowsOS) "/bin/flutter.bat" else "/bin/flutter"
+                    flutterSdk.homePath + if (Utils.isWindowsOS) "/bin/flutter.bat" else "/bin/flutter"
             log.info("find flutter home : $flutterSdkPath")
         }
         initData()
@@ -220,6 +220,9 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
                     Utils.gitForm = GitForm(project)
                     Utils.gitForm?.isVisible = true
                 }
+                command.name.startsWith("flutter pub get") -> {
+                    Utils.flutterPubGet(project, path, command = command, isSYN = isSYN)
+                }
                 else -> {
                     Utils.execCommand(project, path, command)
                 }
@@ -237,84 +240,84 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
     private fun initData() {
         if (isFlutter) {
             flutterDataList.add(
-                Command(
-                    "flutter clean",
-                    arrayOf(flutterSdkPath, "clean"), "flutter clean"
-                )
+                    Command(
+                            "flutter clean",
+                            arrayOf(flutterSdkPath, "clean"), "flutter clean"
+                    )
             )
             flutterDataList.add(
-                Command(
-                    "flutter pub get",
-                    arrayOf(flutterSdkPath, "pub", "get"), "flutter pub get"
-                )
+                    Command(
+                            "flutter pub get",
+                            arrayOf(flutterSdkPath, "pub", "get"), "flutter pub get"
+                    )
             )
             flutterDataList.add(
-                Command(
-                    "delete lock file",
-                    arrayOf("delete lock file"), "delete lock file"
-                )
+                    Command(
+                            "delete lock file",
+                            arrayOf("delete lock file"), "delete lock file"
+                    )
             )
             flutterDataList.add(
-                Command(
-                    "one key exec",
-                    arrayOf(flutterSdkPath),
-                    "delete lock file, then exec flutter clean、flutter pub get"
-                )
+                    Command(
+                            "one key exec",
+                            arrayOf(flutterSdkPath),
+                            "delete lock file, then exec flutter clean、flutter pub get"
+                    )
             )
 
             flutterDataList.add(
-                Command(
-                    "build_runner rebuild",
-                    arrayOf(flutterSdkPath, "pub", "run", "build_runner", "build", "--delete-conflicting-output"),
-                    "flutter pub run build_runner build --delete-conflicting-outputs"
-                )
+                    Command(
+                            "build_runner rebuild",
+                            arrayOf(flutterSdkPath, "pub", "run", "build_runner", "build", "--delete-conflicting-output"),
+                            "flutter pub run build_runner build --delete-conflicting-outputs"
+                    )
             )
         }
         if (isGit) {
             gitDataList.add(
-                Command(
-                    "git tag",
-                    arrayOf("git", "tag"),
-                    "git tag"
-                )
+                    Command(
+                            "git tag",
+                            arrayOf("git", "tag"),
+                            "git tag"
+                    )
             )
         }
         if (!Utils.isWindowsOS && isSYN) {
             postGetDataList.add(
-                Command(
-                    "postget.sh",
-                    arrayOf("./postget.sh"),
-                    "./postget.sh"
-                )
+                    Command(
+                            "postget.sh",
+                            arrayOf("./postget.sh"),
+                            "./postget.sh"
+                    )
             )
         }
         adbDataList.add(
-            Command(
-                "adb logcat",
-                arrayOf("adb", "logcat", "-v", "time", ">", "log.txt"),
-                "adb logcat -v time > log.txt"
-            )
+                Command(
+                        "adb logcat",
+                        arrayOf("adb", "logcat", "-v", "time", ">", "log.txt"),
+                        "adb logcat -v time > log.txt"
+                )
         )
         adbDataList.add(
-            Command(
-                "adb devices",
-                arrayOf("adb", "devices"),
-                "adb devices"
-            )
+                Command(
+                        "adb devices",
+                        arrayOf("adb", "devices"),
+                        "adb devices"
+                )
         )
         adbDataList.add(
-            Command(
-                "adb kill-server",
-                arrayOf("adb", "kill-server"),
-                "adb kill-server"
-            )
+                Command(
+                        "adb kill-server",
+                        arrayOf("adb", "kill-server"),
+                        "adb kill-server"
+                )
         )
         adbDataList.add(
-            Command(
-                "adb start-server",
-                arrayOf("adb", "start-server"),
-                "adb start-server"
-            )
+                Command(
+                        "adb start-server",
+                        arrayOf("adb", "start-server"),
+                        "adb start-server"
+                )
         )
     }
 }
