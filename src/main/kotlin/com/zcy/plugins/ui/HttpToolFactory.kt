@@ -39,7 +39,6 @@ import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.UnsupportedFlavorException
-import java.awt.event.ActionEvent
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -144,10 +143,10 @@ class HttpToolFactory : ToolWindowFactory {
                         return
                     }
                     val cb = Toolkit.getDefaultToolkit().systemClipboard
-                    initTables()
                     requestText.text = ""
                     bodyText.text = ""
                     if (s == cb.getData(DataFlavor.stringFlavor)) {
+                        initTables()
                         val u = URL(s)
                         convertButton.isVisible = false
                         generateRequest.isVisible = false
@@ -180,8 +179,11 @@ class HttpToolFactory : ToolWindowFactory {
                 }
             }
 
-            override fun removeUpdate(e: DocumentEvent) {}
-            override fun changedUpdate(e: DocumentEvent) {}
+            override fun removeUpdate(e: DocumentEvent) {
+            }
+
+            override fun changedUpdate(e: DocumentEvent) {
+            }
         })
     }
 
@@ -239,12 +241,14 @@ class HttpToolFactory : ToolWindowFactory {
         val dist = JSONObject.fromObject(resultJson)
         val resultName = parser.decodeJSONObject(dist)
         Messages.showInfoMessage(project, "Generating success!", "Success")
-        val file = File("$path$resultName.java")
+        val file = File(path, "$resultName.java")
         if (file.exists()) {
-            val f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file)
-            if (f != null) {
-                f.refresh(false, true)
-                FileEditorManager.getInstance(project).openTextEditor(OpenFileDescriptor(project, f), true)
+            SwingUtilities.invokeLater {
+                val f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file)
+                if (f != null) {
+                    f.refresh(false, true)
+                    FileEditorManager.getInstance(project).openTextEditor(OpenFileDescriptor(project, f), true)
+                }
             }
         }
     }

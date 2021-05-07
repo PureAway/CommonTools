@@ -82,7 +82,7 @@ class ConsoleToolFactory : ToolWindowFactory {
         override fun mouseClicked(e: MouseEvent) {
             if (e.button == 3) { // 鼠标右键
                 // 添加右键菜单的内容
-                val list = JBList<String?>()
+                val list = JBList<String>()
                 val title = arrayOfNulls<String>(2)
                 title[0] = "    Select All"
                 title[1] = "    Clear All"
@@ -96,7 +96,7 @@ class ConsoleToolFactory : ToolWindowFactory {
                 list.border = lineBorder
 
                 // 创建菜单 添加点击项的监听事件
-                val popup = PopupChooserBuilder<Any?>(list)
+                val popup = PopupChooserBuilder<String>(list)
                     .setItemChoosenCallback {
                         val value = list.selectedValue
                         if (value!!.contains("Clear All")) {

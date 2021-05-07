@@ -1,6 +1,5 @@
 package com.zcy.plugins.utils
 
-import com.google.common.collect.ImmutableList
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.diagnostic.Logger

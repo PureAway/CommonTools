@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.zcy.plugins'
-version '1.0.1'
+version '1.0.2'
 
 repositories {
     jcenter()
@@ -36,11 +36,25 @@ intellij {
     plugins = ['com.intellij.java']
     version '2020.1.4'
 }
+
+patchPluginXml {
+    sinceBuild '201.6668.113'
+    untilBuild '211.7142.45'
+}
+
+//runIde {
+//    ideDirectory '/Applications/Android Studio.app/Contents'
+//}
+
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 patchPluginXml {
     changeNotes """
+    <h2>1.0.2</h2>
+    <ul>
+      <li>upgrade until-build version to 211.*</li>
+    </ul>
     <h2>1.0.1</h2>
     <ul>
       <li>added some screenshot</li>
