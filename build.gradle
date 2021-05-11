@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.zcy.plugins'
-version '1.0.2'
+version '1.0.4'
 
 repositories {
     jcenter()
@@ -51,6 +51,14 @@ compileKotlin {
 }
 patchPluginXml {
     changeNotes """
+    <h2>1.0.4</h2>
+    <ul>
+      <li>fix the wrong command for flutter build_runner rebuild</li>
+    </ul>
+    <h2>1.0.3</h2>
+    <ul>
+      <li>fix the wrong import for liveTemplates</li>
+    </ul>
     <h2>1.0.2</h2>
     <ul>
       <li>upgrade until-build version to 211.*</li>

@@ -99,9 +99,7 @@
     <template name="exp"
               description="@ExportPath('')"
               toReformat="false" toShortenFQNames="true"
-              value="import 'package:syn_base_tools/syn_base_tools.dart';';
-      &#10;&#10;@ExportPath('$PACKAGE_NAME$')
-     ">
+              value="import 'package:syn_base_tools/syn_base_tools.dart';&#10;&#10;@ExportPath('$PACKAGE_NAME$')">
         <variable name="PACKAGE_NAME" alwaysStopAt="true" defaultValue="&quot;PACKAGE_NAME&quot;" expression=""/>
         <context>
             <option name="FLUTTER" value="true"/>
@@ -111,9 +109,7 @@
     <template name="images"
               description="@ImagePathSet('images/','ImagePath')"
               toReformat="false" toShortenFQNames="true"
-              value="import 'package:syn_base_tools/syn_base_tools.dart';';
-      &#10;&#10;@ImagePathSet('images/','$ImagePath$')
-     ">
+              value="import 'package:syn_base_tools/syn_base_tools.dart';&#10;&#10;@ImagePathSet('images/','$ImagePath$')">
         <variable name="ImagePath" alwaysStopAt="true" defaultValue="&quot;ImagePath&quot;" expression=""/>
         <context>
             <option name="FLUTTER" value="true"/>
