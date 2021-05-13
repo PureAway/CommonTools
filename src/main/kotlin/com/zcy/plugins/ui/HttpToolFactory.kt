@@ -70,6 +70,7 @@ class HttpToolFactory : ToolWindowFactory {
     private lateinit var headersTable: JTable
     private lateinit var headersAddBtn: JButton
     private lateinit var headersRemoveBtn: JButton
+    private lateinit var signBtn: JButton
     private lateinit var code: JLabel
     private lateinit var convertButton: JButton
     private lateinit var bodyPane: RTextScrollPane
@@ -82,6 +83,7 @@ class HttpToolFactory : ToolWindowFactory {
     private lateinit var generateRequest: JButton
     private lateinit var project: Project
     private var resultJson: String? = null
+    private var clickTimes = 0
     private var store: BoxStore? = null
     private var box: Box<RequestHistory?>? = null
     private var requestHistory: RequestHistory? = null
@@ -113,6 +115,8 @@ class HttpToolFactory : ToolWindowFactory {
         requestText.closeCurlyBraces = true
         requestText.closeMarkupTags = true
         requestText.closeMarkupTags = true
+        val signIcon = ImageIcon(javaClass.getResource("/icons/xixi.png"))
+        signBtn.icon = signIcon
     }
 
     private fun initActionListeners() {
@@ -154,9 +158,9 @@ class HttpToolFactory : ToolWindowFactory {
                         val q = splitQuery(u)
                         for ((key, value) in q) {
                             (queryTable.model as DefaultTableModel).addRow(
-                                arrayOf(
-                                    key, value
-                                )
+                                    arrayOf(
+                                            key, value
+                                    )
                             )
                         }
                         SwingUtilities.invokeLater {
@@ -185,6 +189,29 @@ class HttpToolFactory : ToolWindowFactory {
             override fun changedUpdate(e: DocumentEvent) {
             }
         })
+        signBtn.addActionListener {
+            clickTimes++
+            if (clickTimes == 8) {
+                clickTimes = 0
+                showSignDialog()
+            }
+        }
+    }
+
+
+    private fun showSignDialog() {
+        val dialogBuilder = DialogBuilder()
+        val rootView = JPanel()
+        rootView.preferredSize = Dimension(300, 150)
+        rootView.layout = VerticalLayout(5)
+        val psiBtn = JButton("Get PSI Sign")
+        rootView.add(psiBtn)
+        val uhomeBtn = JButton("Get Uhome Sign")
+        rootView.add(uhomeBtn)
+        dialogBuilder.setCenterPanel(rootView)
+        dialogBuilder.setTitle("Get Sign")
+        dialogBuilder.removeAllActions()
+        dialogBuilder.show()
     }
 
     private fun showConvertDialog() {
@@ -262,7 +289,7 @@ class HttpToolFactory : ToolWindowFactory {
             if (pairs.isNotEmpty()) for (pair in pairs) {
                 val idx = pair.indexOf("=")
                 query_pairs[URLDecoder.decode(pair.substring(0, idx), "UTF-8")] =
-                    URLDecoder.decode(pair.substring(idx + 1), "UTF-8")
+                        URLDecoder.decode(pair.substring(idx + 1), "UTF-8")
             }
         }
         return query_pairs
@@ -326,15 +353,15 @@ class HttpToolFactory : ToolWindowFactory {
                 }
             }
             val rb = Request.Builder().url(uri.toString()).method(
-                methodBox.selectedItem.toString(), body
+                    methodBox.selectedItem.toString(), body
             )
             if (!contentTypeBox.selectedItem.toString()
-                    .equals("", ignoreCase = true)
+                            .equals("", ignoreCase = true)
             ) {
                 rb.addHeader("Content-Type", contentTypeBox.selectedItem.toString())
             }
             if (!uaBox.selectedItem.toString()
-                    .equals("", ignoreCase = true)
+                            .equals("", ignoreCase = true)
             ) {
                 rb.addHeader("User-Agent", uaBox.selectedItem.toString())
             }
@@ -380,8 +407,8 @@ class HttpToolFactory : ToolWindowFactory {
                             SwingUtilities.invokeAndWait {
                                 for (i in 0 until responseHeaders.size()) {
                                     bodyText.syntaxEditingStyle =
-                                        response.body().contentType().type() + "/" + response.body().contentType()
-                                            .subtype()
+                                            response.body().contentType().type() + "/" + response.body().contentType()
+                                                    .subtype()
                                     val responseBody = response.body()
                                     var source: BufferedSource? = null
                                     try {
@@ -407,17 +434,17 @@ class HttpToolFactory : ToolWindowFactory {
                                             val parser = JsonParser()
                                             val el = parser.parse(s)
                                             val gson =
-                                                GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeNulls()
-                                                    .create()
+                                                    GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeNulls()
+                                                            .create()
                                             s = gson.toJson(el)
                                             bodyText.text = s
                                             bodyText.syntaxEditingStyle = SyntaxConstants.SYNTAX_STYLE_JSON
                                             resultJson = s
                                         } else if (response.body().contentType().subtype()
-                                                .equals("xml", ignoreCase = true)
-                                            || response.body().contentType().subtype()
-                                                .equals("rss+xml", ignoreCase = true)
-                                            || response.body().contentType().subtype().equals("smil", ignoreCase = true)
+                                                        .equals("xml", ignoreCase = true)
+                                                || response.body().contentType().subtype()
+                                                        .equals("rss+xml", ignoreCase = true)
+                                                || response.body().contentType().subtype().equals("smil", ignoreCase = true)
                                         ) {
                                             val xmlInput: Source = StreamSource(StringReader(s))
                                             val stringWriter = StringWriter()

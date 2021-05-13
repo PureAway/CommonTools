@@ -54,8 +54,17 @@ class GitForm(project: Project) : JFrame() {
                     val lim = min(len1, len2)
                     var i = 0
                     while (i < lim) {
-                        val c1 = if ("" == s1Split[i]) 0 else s1Split[i].toInt()
-                        val c2 = if ("" == s2Split[i]) 0 else s2Split[i].toInt()
+                        val c1 = if ("" == s1Split[i]) 0 else {
+                            s1Split[i].replace("_", "").toIntOrNull()?.let {
+                                it
+                            } ?: 0
+                        }
+                        val c2 = if ("" == s2Split[i]) 0 else {
+                            s2Split[i].replace("_", "").toIntOrNull()?.let {
+                                it
+                            } ?: 0
+
+                        }
                         if (c1 != c2) {
                             return@Comparator c1 - c2
                         }
@@ -69,7 +78,7 @@ class GitForm(project: Project) : JFrame() {
             val stringBuilder = StringBuilder()
             for (str in tags) {
                 stringBuilder.append(str)
-                    .append("\n")
+                        .append("\n")
             }
             val code = process.waitFor()
             if (code == 0) {
@@ -100,7 +109,7 @@ class GitForm(project: Project) : JFrame() {
                 val stringBuilder = StringBuilder()
                 for (i in 0 until result.size - 1) {
                     stringBuilder.append(result[i])
-                        .append(".")
+                            .append(".")
                 }
                 stringBuilder.append(nextVersion)
                 return stringBuilder.toString().replace("\n", "")
@@ -122,16 +131,16 @@ class GitForm(project: Project) : JFrame() {
         commit.preferredSize = Dimension(-1, 40)
         pull!!.addActionListener {
             val command = Command(
-                "git pull",
-                arrayOf("git", "pull", "--rebase"),
-                "git pull --rebase"
+                    "git pull",
+                    arrayOf("git", "pull", "--rebase"),
+                    "git pull --rebase"
             )
             Utils.execCommand(project, project.basePath, command,
-                successAction = {
-                    showTags(project)
-                }, failAction = {
+                    successAction = {
+                        showTags(project)
+                    }, failAction = {
 
-                })
+            })
         }
         commit.addActionListener {
             val cmd = ArrayList<String>()
@@ -146,17 +155,17 @@ class GitForm(project: Project) : JFrame() {
                 cmd.add(mStr.text)
             }
             Utils.gitTag(project, cmd.toTypedArray(),
-                successAction = {
-                    val com = "git push origin " + nextVersion.text
-                    Utils.pushTag(project, com, successAction = {
-                        showTags(project)
-                    }, failAction = {
+                    successAction = {
+                        val com = "git push origin " + nextVersion.text
+                        Utils.pushTag(project, com, successAction = {
+                            showTags(project)
+                        }, failAction = {
+
+                        })
+                    },
+                    failAction = {
 
                     })
-                },
-                failAction = {
-
-                })
         }
     }
 
