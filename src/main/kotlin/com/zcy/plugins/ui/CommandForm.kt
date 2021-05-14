@@ -17,7 +17,6 @@ import java.awt.Font
 import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.awt.datatransfer.Transferable
-import java.awt.event.ActionEvent
 import java.util.*
 import java.util.Timer
 import javax.swing.*

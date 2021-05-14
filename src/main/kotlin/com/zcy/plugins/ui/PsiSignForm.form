@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.zcy.plugins.ui.PsiSignForm">
+  <grid id="27dc6" binding="content" layout-manager="FlowLayout" hgap="5" vgap="5" flow-align="0">
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="6ea47" class="javax.swing.JLabel">
+        <constraints/>
+        <properties>
+          <text value="appId"/>
+        </properties>
+      </component>
+      <component id="a1e08" class="javax.swing.JTextArea" binding="idText">
+        <constraints/>
+        <properties>
+          <editable value="true"/>
+          <enabled value="true"/>
+          <lineWrap value="false"/>
+        </properties>
+      </component>
+      <component id="2b976" class="javax.swing.JLabel">
+        <constraints/>
+        <properties>
+          <enabled value="true"/>
+          <text value="appKey"/>
+        </properties>
+      </component>
+      <component id="40bd1" class="javax.swing.JTextArea" binding="keyText">
+        <constraints/>
+        <properties>
+          <lineWrap value="false"/>
+        </properties>
+      </component>
+      <component id="94c6c" class="javax.swing.JLabel">
+        <constraints/>
+        <properties>
+          <text value="uhomeClientId"/>
+        </properties>
+      </component>
+      <component id="5457a" class="javax.swing.JTextArea" binding="clientText">
+        <constraints/>
+        <properties>
+          <editable value="true"/>
+          <enabled value="true"/>
+          <lineWrap value="false"/>
+        </properties>
+      </component>
+      <component id="7d56b" class="javax.swing.JButton" binding="signBtn">
+        <constraints/>
+        <properties>
+          <text value="Get Sign"/>
+        </properties>
+      </component>
+      <component id="244f" class="javax.swing.JTextArea" binding="signText">
+        <constraints/>
+        <properties/>
+      </component>
+    </children>
+  </grid>
+</form>

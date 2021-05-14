@@ -21,6 +21,8 @@ import com.zcy.plugins.model.Command
 import com.zcy.plugins.model.KillCommand
 import com.zcy.plugins.ui.CommandForm
 import com.zcy.plugins.ui.GitForm
+import com.zcy.plugins.ui.PsiSignForm
+import com.zcy.plugins.ui.UhomeSignForm
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,6 +39,8 @@ object Utils {
     var gitPath: String? = null
     var commandForm: CommandForm? = null
     var gitForm: GitForm? = null
+    var psiForm: PsiSignForm? = null
+    var uhomeForm: UhomeSignForm? = null
     var isBuildRunnerSuccess: Boolean = false
     const val FLUTTER_HOST_ENV = "FLUTTER_HOST"
 
@@ -368,7 +372,8 @@ object Utils {
     private fun processDeleteCommand(command: Command, dirPath: String?): Boolean {
         if (command.name.startsWith("delete")
             || command.name.startsWith("one")
-            ||command.name.startsWith("build_runner rebuild")) {
+            || command.name.startsWith("build_runner rebuild")
+        ) {
             isBuildRunnerSuccess =
                 deleteLockFile(dirPath)
             return true
