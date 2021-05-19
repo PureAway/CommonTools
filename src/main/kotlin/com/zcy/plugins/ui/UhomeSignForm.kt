@@ -68,10 +68,6 @@ class UhomeSignForm(val project: Project) : JFrame("Uhome Sign") {
                 Utils.showErrorNotification(project, "appKey can not be null")
                 return@addActionListener
             }
-            if (Utils.isEmptyString(bodyText.text)) {
-                Utils.showErrorNotification(project, "bodyJson can not be null")
-                return@addActionListener
-            }
             if (Utils.isEmptyString(timeText.text)) {
                 Utils.showErrorNotification(project, "timeStamp can not be null")
                 return@addActionListener
@@ -81,14 +77,18 @@ class UhomeSignForm(val project: Project) : JFrame("Uhome Sign") {
     }
 
     private fun getUhomeSign() {
-        val sign = createSign(pathText.text, bodyText.text, idText.text, keyText.text, timeText.text)
+        val sign = createSign(pathText.text, if (Utils.isEmptyString(bodyText.text)) {
+            ""
+        } else {
+            bodyText.text
+        }, idText.text, keyText.text, timeText.text)
         signText.text = sign
     }
 
 
     private fun createSign(
-        path: String, requestBody: String, appId: String, appKey: String,
-        timestamp: String
+            path: String, requestBody: String, appId: String, appKey: String,
+            timestamp: String
     ): String {
         var body = requestBody
         val builder = StringBuilder()

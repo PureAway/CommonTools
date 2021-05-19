@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.zcy.plugins'
-version '1.0.6'
+version '1.0.7'
 
 repositories {
     jcenter()
@@ -51,6 +51,10 @@ compileKotlin {
 }
 patchPluginXml {
     changeNotes """
+    <h2>1.0.7</h2>
+    <ul>
+      <li>fix the bug: request body can not be null</li>
+    </ul>
     <h2>1.0.6</h2>
     <ul>
       <li>added the get sign function</li>
