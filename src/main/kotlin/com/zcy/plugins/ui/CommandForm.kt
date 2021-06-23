@@ -212,6 +212,9 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
                 command.name == "images_path_generator" -> {
                     Utils.generateImagesPath(path)
                 }
+                command.name == "export_path_generator" ->{
+                    Utils.generateExportPath(path)
+                }
                 command.name == "one key exec" -> {
                     Utils.oneKeyExec(project, path, command, isSYN)
                 }
@@ -287,6 +290,14 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
                             "images_path_generator",
                             arrayOf("generate images path at pubspec.yaml file"),
                             "generate images path at pubspec.yaml file"
+                    )
+            )
+
+            flutterDataList.add(
+                    Command(
+                            "export_path_generator",
+                            arrayOf("generate export path at library file"),
+                            "generate export path at library file"
                     )
             )
         }

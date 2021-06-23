@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.zcy.plugins'
-version '1.0.8'
+version '1.0.9'
 
 repositories {
     jcenter()
@@ -21,6 +21,7 @@ dependencies {
     implementation(name: 'com.springsource.org.apache.commons.collections-3.2.0', ext: 'jar')
     implementation(name: 'com.springsource.org.apache.commons.lang-2.1.0', ext: 'jar')
     implementation(name: 'com.springsource.org.apache.commons.logging-1.1.1', ext: 'jar')
+    implementation(name: 'snakeyaml-1.30', ext: 'jar')
     implementation(name: 'commons-codec-1.2', ext: 'jar')
     implementation('com.fifesoft:rsyntaxtextarea:3.1.2')
     implementation('org.greenrobot:essentials:3.1.0')
@@ -51,6 +52,10 @@ compileKotlin {
 }
 patchPluginXml {
     changeNotes """
+    <h2>1.0.9</h2>
+    <ul>
+      <li>added the export path generating function for flutter package project</li>
+    </ul>
     <h2>1.0.8</h2>
     <ul>
       <li>added the images path generating function for flutter project</li>

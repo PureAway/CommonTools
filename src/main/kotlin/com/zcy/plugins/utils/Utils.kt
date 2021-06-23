@@ -1,6 +1,5 @@
 package com.zcy.plugins.utils
 
-import com.esotericsoftware.minlog.Log
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.diagnostic.Logger
@@ -24,6 +23,7 @@ import com.zcy.plugins.ui.CommandForm
 import com.zcy.plugins.ui.GitForm
 import com.zcy.plugins.ui.PsiSignForm
 import com.zcy.plugins.ui.UhomeSignForm
+import org.yaml.snakeyaml.Yaml
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -32,6 +32,7 @@ import javax.swing.JScrollBar
 import javax.swing.JScrollPane
 import javax.swing.JTextArea
 import javax.swing.SwingUtilities
+import kotlin.collections.HashMap
 
 object Utils {
 
@@ -161,10 +162,10 @@ object Utils {
     fun showNotification(project: Project?, type: MessageType?, text: String?) {
         val statusBar = WindowManager.getInstance().getStatusBar(project!!)
         JBPopupFactory.getInstance()
-                .createHtmlTextBalloonBuilder(text!!, type, null)
-                .setFadeoutTime(5000)
-                .createBalloon()
-                .show(RelativePoint.getCenterOf(statusBar.component), Balloon.Position.atRight)
+            .createHtmlTextBalloonBuilder(text!!, type, null)
+            .setFadeoutTime(5000)
+            .createBalloon()
+            .show(RelativePoint.getCenterOf(statusBar.component), Balloon.Position.atRight)
     }
 
 
@@ -173,7 +174,7 @@ object Utils {
         for (i in value.indices) {
             val c = value[i]
             if (i != 0 && Pattern.matches("[a-z]", value[i - 1].toString())
-                    && Pattern.matches("[A-Z]", c.toString())
+                && Pattern.matches("[A-Z]", c.toString())
             ) {
                 stringBuilder.append("_")
             }
@@ -242,7 +243,7 @@ object Utils {
 
     private fun getPids(killCommand: KillCommand): Array<String>? {
         return if (isWindowsOS) getPidsOnWindows(
-                killCommand
+            killCommand
         ) else getPidsOnUnix(killCommand)
     }
 
@@ -282,7 +283,7 @@ object Utils {
         }
         if (null == pids || pids.isEmpty()) {
             showErrorMessage(
-                    "No " + killCommand.killWhat + " process is running!"
+                "No " + killCommand.killWhat + " process is running!"
             )
         } else {
             var result = true
@@ -291,11 +292,11 @@ object Utils {
             }
             if (result) {
                 showInfo(
-                        killCommand.killWhat + " was killed! Your IDE may show you some other dialogs, it's safe to ignore them."
+                    killCommand.killWhat + " was killed! Your IDE may show you some other dialogs, it's safe to ignore them."
                 )
             } else {
                 showErrorMessage(
-                        "Could not kill " + killCommand.killWhat + "! Check that your system supports killing processes!"
+                    "Could not kill " + killCommand.killWhat + "! Check that your system supports killing processes!"
                 )
             }
         }
@@ -307,7 +308,7 @@ object Utils {
         val process: Process
         try {
             process = runtime.exec(
-                    "wmic process where " + killCommand.processWhereOnUnixOnWindows + " get processid"
+                "wmic process where " + killCommand.processWhereOnUnixOnWindows + " get processid"
             )
             process.waitFor()
             val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
@@ -330,7 +331,7 @@ object Utils {
 
     private fun killProcess(pid: String): Boolean {
         return if (isWindowsOS) killProcessOnWindows(
-                pid
+            pid
         ) else killProcessOnUnix(pid)
     }
 
@@ -372,11 +373,11 @@ object Utils {
 
     private fun processDeleteCommand(command: Command, dirPath: String?): Boolean {
         if (command.name.startsWith("delete")
-                || command.name.startsWith("one")
-                || command.name.startsWith("build_runner rebuild")
+            || command.name.startsWith("one")
+            || command.name.startsWith("build_runner rebuild")
         ) {
             isBuildRunnerSuccess =
-                    deleteLockFile(dirPath)
+                deleteLockFile(dirPath)
             return true
         }
         return false
@@ -400,7 +401,7 @@ object Utils {
         if (!isEmptyString(message) && jTextArea != null && verticalBar != null) {
             val curMessage = currentTime + message
             jTextArea.append(
-                    "\n" + curMessage
+                "\n" + curMessage
             )
             verticalBar.value = verticalBar.maximum
         } else {
@@ -413,20 +414,20 @@ object Utils {
         val pubSpecFile = File(dirPath, "pubspec.yaml")
         if (!pubSpecFile.exists()) {
             showInfo(
-                    "can not found pubspec.yaml file at current selected directory."
+                "can not found pubspec.yaml file at current selected directory."
             )
             return
         }
         val imagesFile = File(dirPath, "images")
         if (!imagesFile.exists() || imagesFile.listFiles().isNullOrEmpty()) {
             showInfo(
-                    "can not found images directory or this directory don't have any image files."
+                "can not found images directory or this directory don't have any image files."
             )
             return
         }
         val stringBuilder = StringBuilder("\n\n")
         stringBuilder.append("flutter:\n")
-                .append("  assets:\n")
+            .append("  assets:\n")
         buildImagesPath(stringBuilder, imagesFile, dirPath!!)
 
         val fileWriter = FileWriter(pubSpecFile.absolutePath, true)
@@ -434,6 +435,66 @@ object Utils {
         bw.write(stringBuilder.toString())
         bw.close()
         fileWriter.close()
+    }
+
+    fun generateExportPath(dirPath: String?) {
+        val pubSpecFile = File(dirPath, "pubspec.yaml")
+        if (!pubSpecFile.exists()) {
+            showInfo(
+                "can not found pubspec.yaml file at current selected directory."
+            )
+            return
+        }
+        val inputStream = FileInputStream(pubSpecFile)
+        val yaml = Yaml()
+        val map = yaml.load<HashMap<String, String>>(inputStream)
+        val name = map["name"]
+        if (name.isNullOrEmpty()) {
+            showInfo(
+                "can not found name at pubspec.yaml file."
+            )
+            return
+        }
+        val libraryFile = File(dirPath, "lib/${name}.dart")
+        if (!libraryFile.exists()) {
+            showInfo(
+                "can not found file which named ${libraryFile.absolutePath}."
+            )
+            return
+        }
+
+        val stringBuilder = StringBuilder("\n\n")
+        val codeFile = File(dirPath, "lib")
+        buildExportPath(stringBuilder, codeFile, codeFile.absolutePath, name)
+
+        val fileWriter = FileWriter(libraryFile.absolutePath, true)
+        val bw = BufferedWriter(fileWriter)
+        bw.write(stringBuilder.toString())
+        bw.close()
+        fileWriter.close()
+    }
+
+    private fun buildExportPath(build: StringBuilder, file: File, dirPath: String, name: String) {
+        val files = file.listFiles()
+        if (!files.isNullOrEmpty()) {
+            files.forEach {
+                if (it.isDirectory) {
+                    buildExportPath(build, it, dirPath, name)
+                } else {
+                    if (it.name.endsWith(".dart", true)
+                        && !it.name.endsWith("$name.dart", true)
+                        && !it.name.endsWith(".g.dart", true)
+                        && !it.name.endsWith(".path.dart", true)
+                        && !it.name.endsWith(".export.dart", true)
+                    ) {
+                        val absolutePath = it.absolutePath
+                        val resultPath = absolutePath.split(dirPath)[1]
+                        build.append("export \'package:$name$resultPath\';")
+                            .append("\n")
+                    }
+                }
+            }
+        }
     }
 
     private fun buildImagesPath(build: StringBuilder, file: File, dirPath: String) {
@@ -444,16 +505,17 @@ object Utils {
                     buildImagesPath(build, it, dirPath)
                 } else {
                     if (it.name.endsWith(".png", true)
-                            || it.name.endsWith(".jpg", true)
-                            || it.name.endsWith("webp", true)
-                            || it.name.endsWith("gif", true)
-                            || it.name.endsWith("bmp", true)
-                            || it.name.endsWith(".JPEG", true)) {
+                        || it.name.endsWith(".jpg", true)
+                        || it.name.endsWith("webp", true)
+                        || it.name.endsWith("gif", true)
+                        || it.name.endsWith("bmp", true)
+                        || it.name.endsWith(".JPEG", true)
+                    ) {
                         val absolutePath = it.absolutePath
                         val resultPath = absolutePath.split(dirPath + File.separator)[1]
                         build.append("    - ")
-                                .append(resultPath)
-                                .append("\n")
+                            .append(resultPath)
+                            .append("\n")
                     }
                 }
             }
@@ -461,9 +523,9 @@ object Utils {
     }
 
     fun oneKeyExec(
-            project: Project, dirPath: String?,
-            command: Command, isSYN: Boolean,
-            finishAction: (() -> Unit)? = null
+        project: Project, dirPath: String?,
+        command: Command, isSYN: Boolean,
+        finishAction: (() -> Unit)? = null
     ) {
         if (processDeleteCommand(command, dirPath)) {
             val toolWindow: ToolWindow? = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands")
@@ -474,73 +536,73 @@ object Utils {
                 val jTextArea = jScrollPane.viewport.getComponent(0) as JTextArea
                 val commandName: String = command.name
                 project.asyncTask(commandName,
-                        runAction = {
-                            val cmd = arrayOf(command.command[0], "clean")
-                            val fillCmd = getCommand(cmd)
-                            log(jTextArea, verticalBar, "$dirPath: $fillCmd")
-                            try {
-                                val process = Runtime.getRuntime().exec(cmd, null, File(dirPath))
-                                val bufferedErrorStream = BufferedInputStream(process.errorStream)
-                                val bufferedInputStream = BufferedInputStream(process.inputStream)
-                                val bufferedErrorReader = BufferedReader(InputStreamReader(bufferedErrorStream, "utf-8"))
-                                val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
-                                var lineStr: String?
-                                while (bufferedInputReader.readLine().also {
-                                            lineStr = it
-                                        } != null) {
-                                    log(jTextArea, verticalBar, lineStr)
-                                }
-                                while (
-                                        bufferedErrorReader.readLine().also {
-                                            lineStr = it
-                                        } != null
-                                ) {
-                                    log(jTextArea, verticalBar, lineStr)
-                                }
-                                val code = process.waitFor()
-                                if (code == 0) {
-                                    isBuildRunnerSuccess = true
-                                    log(
-                                            jTextArea, verticalBar,
-                                            "flutter clean Success! Exit with code: $code"
-                                    )
-                                } else {
-                                    isBuildRunnerSuccess = false
-                                    log(
-                                            jTextArea, verticalBar,
-                                            "flutter clean Error! Exit with code: $code"
-                                    )
-                                }
-                                bufferedErrorStream.close()
-                                bufferedInputStream.close()
-                                bufferedErrorReader.close()
-                                bufferedInputReader.close()
-                            } catch (e: Throwable) {
-                                isBuildRunnerSuccess = false
-                                e.printStackTrace()
+                    runAction = {
+                        val cmd = arrayOf(command.command[0], "clean")
+                        val fillCmd = getCommand(cmd)
+                        log(jTextArea, verticalBar, "$dirPath: $fillCmd")
+                        try {
+                            val process = Runtime.getRuntime().exec(cmd, null, File(dirPath))
+                            val bufferedErrorStream = BufferedInputStream(process.errorStream)
+                            val bufferedInputStream = BufferedInputStream(process.inputStream)
+                            val bufferedErrorReader = BufferedReader(InputStreamReader(bufferedErrorStream, "utf-8"))
+                            val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
+                            var lineStr: String?
+                            while (bufferedInputReader.readLine().also {
+                                    lineStr = it
+                                } != null) {
+                                log(jTextArea, verticalBar, lineStr)
                             }
-                        }, successAction = {
-                    if (isBuildRunnerSuccess) {
-                        flutterPubGet(
+                            while (
+                                bufferedErrorReader.readLine().also {
+                                    lineStr = it
+                                } != null
+                            ) {
+                                log(jTextArea, verticalBar, lineStr)
+                            }
+                            val code = process.waitFor()
+                            if (code == 0) {
+                                isBuildRunnerSuccess = true
+                                log(
+                                    jTextArea, verticalBar,
+                                    "flutter clean Success! Exit with code: $code"
+                                )
+                            } else {
+                                isBuildRunnerSuccess = false
+                                log(
+                                    jTextArea, verticalBar,
+                                    "flutter clean Error! Exit with code: $code"
+                                )
+                            }
+                            bufferedErrorStream.close()
+                            bufferedInputStream.close()
+                            bufferedErrorReader.close()
+                            bufferedInputReader.close()
+                        } catch (e: Throwable) {
+                            isBuildRunnerSuccess = false
+                            e.printStackTrace()
+                        }
+                    }, successAction = {
+                        if (isBuildRunnerSuccess) {
+                            flutterPubGet(
                                 project,
                                 dirPath,
                                 command,
                                 isSYN,
                                 finishAction
-                        )
-                    } else {
-                        showErrorMessage(
+                            )
+                        } else {
+                            showErrorMessage(
                                 "An exception error occurred during command execution. " +
                                         "Please manually execute and resolve the error before using this plugin."
-                        )
-                    }
-                }, failAction = {
-                    showErrorMessage(
+                            )
+                        }
+                    }, failAction = {
+                        showErrorMessage(
                             command.errorMessage + ", message:" + it.localizedMessage
-                    )
-                }, finishAction = {
+                        )
+                    }, finishAction = {
 
-                })
+                    })
             }
         } else {
             showErrorMessage("delete lock file failed")
@@ -559,7 +621,7 @@ object Utils {
     }
 
     fun buildRunnerRebuild(
-            project: Project, dirPath: String?, command: Command
+        project: Project, dirPath: String?, command: Command
     ) {
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands")
         if (toolWindow != null) {
@@ -570,7 +632,7 @@ object Utils {
             val commandName: String = command.name
             project.asyncTask(commandName, runAction = {
                 val cmd =
-                        arrayOf(command.command[0], "pub", "run", "build_runner", "build", "--delete-conflicting-outputs")
+                    arrayOf(command.command[0], "pub", "run", "build_runner", "build", "--delete-conflicting-outputs")
                 val fillCmd = getCommand(cmd)
                 log(jTextArea, verticalBar, "$dirPath: $fillCmd")
                 val line = GeneralCommandLine()
@@ -588,27 +650,27 @@ object Utils {
                 val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
                 var lineStr: String?
                 while (bufferedInputReader.readLine().also {
-                            lineStr = it
-                        } != null) {
+                        lineStr = it
+                    } != null) {
                     log(jTextArea, verticalBar, lineStr)
                 }
                 while (bufferedErrorReader.readLine().also {
-                            lineStr = it
-                        } != null) {
+                        lineStr = it
+                    } != null) {
                     log(jTextArea, verticalBar, lineStr)
                 }
                 val code = process.waitFor()
                 if (code == 0) {
                     log(
-                            jTextArea, verticalBar,
-                            "$commandName Success! Exit with code: $code"
+                        jTextArea, verticalBar,
+                        "$commandName Success! Exit with code: $code"
                     )
                     isBuildRunnerSuccess = true
                 } else {
                     isBuildRunnerSuccess = false
                     log(
-                            jTextArea, verticalBar,
-                            "$commandName Error! Exit with code: $code"
+                        jTextArea, verticalBar,
+                        "$commandName Error! Exit with code: $code"
                     )
                 }
                 bufferedErrorStream.close()
@@ -620,13 +682,13 @@ object Utils {
                     showInfo(command.successMessage)
                 } else {
                     showErrorMessage(
-                            "An exception error occurred during command execution. " +
-                                    "Please manually execute and resolve the error before using this plugin."
+                        "An exception error occurred during command execution. " +
+                                "Please manually execute and resolve the error before using this plugin."
                     )
                 }
             }, failAction = {
                 showErrorMessage(
-                        command.errorMessage + ", message:" + it.localizedMessage
+                    command.errorMessage + ", message:" + it.localizedMessage
                 )
             }, finishAction = {
 
@@ -635,8 +697,8 @@ object Utils {
     }
 
     fun flutterPubGet(
-            project: Project, dirPath: String?, command: Command, isSYN: Boolean,
-            finishAction: (() -> Unit)? = null
+        project: Project, dirPath: String?, command: Command, isSYN: Boolean,
+        finishAction: (() -> Unit)? = null
     ) {
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands")
         if (toolWindow != null) {
@@ -664,27 +726,27 @@ object Utils {
                 val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
                 var lineStr: String?
                 while (bufferedInputReader.readLine().also {
-                            lineStr = it
-                        } != null) {
+                        lineStr = it
+                    } != null) {
                     log(jTextArea, verticalBar, lineStr)
                 }
                 while (bufferedErrorReader.readLine().also {
-                            lineStr = it
-                        } != null) {
+                        lineStr = it
+                    } != null) {
                     log(jTextArea, verticalBar, lineStr)
                 }
                 val code = process.waitFor()
                 if (code == 0) {
                     log(
-                            jTextArea, verticalBar,
-                            "$commandName Success! Exit with code: $code"
+                        jTextArea, verticalBar,
+                        "$commandName Success! Exit with code: $code"
                     )
                     isBuildRunnerSuccess = true
                 } else {
                     isBuildRunnerSuccess = false
                     log(
-                            jTextArea, verticalBar,
-                            "$commandName Error! Exit with code: $code"
+                        jTextArea, verticalBar,
+                        "$commandName Error! Exit with code: $code"
                     )
                 }
                 bufferedErrorStream.close()
@@ -707,13 +769,13 @@ object Utils {
                     }
                 } else {
                     showErrorMessage(
-                            "An exception error occurred during command execution. " +
-                                    "Please manually execute and resolve the error before using this plugin."
+                        "An exception error occurred during command execution. " +
+                                "Please manually execute and resolve the error before using this plugin."
                     )
                 }
             }, failAction = {
                 showErrorMessage(
-                        command.errorMessage + ", message:" + it.localizedMessage
+                    command.errorMessage + ", message:" + it.localizedMessage
                 )
             }, finishAction = {
 
@@ -739,27 +801,27 @@ object Utils {
                 val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
                 var lineStr: String?
                 while (bufferedInputReader.readLine().also {
-                            lineStr = it
-                        } != null) {
+                        lineStr = it
+                    } != null) {
                     log(jTextArea, verticalBar, lineStr)
                 }
                 while (bufferedErrorReader.readLine().also {
-                            lineStr = it
-                        } != null) {
+                        lineStr = it
+                    } != null) {
                     log(jTextArea, verticalBar, lineStr)
                 }
                 val code = process.waitFor()
                 if (code == 0) {
                     log(
-                            jTextArea, verticalBar,
-                            "postget Success! Exit with code: $code"
+                        jTextArea, verticalBar,
+                        "postget Success! Exit with code: $code"
                     )
                     isBuildRunnerSuccess = true
                 } else {
                     isBuildRunnerSuccess = false
                     log(
-                            jTextArea, verticalBar,
-                            "postget Error! Exit with code: $code"
+                        jTextArea, verticalBar,
+                        "postget Error! Exit with code: $code"
                     )
                 }
                 bufferedErrorStream.close()
@@ -771,13 +833,13 @@ object Utils {
                     showInfo(command.successMessage)
                 } else {
                     showErrorMessage(
-                            "An exception error occurred during command execution. " +
-                                    "Please manually execute and resolve the error before using this plugin."
+                        "An exception error occurred during command execution. " +
+                                "Please manually execute and resolve the error before using this plugin."
                     )
                 }
             }, failAction = {
                 showErrorMessage(
-                        command.errorMessage + ", message:" + it.localizedMessage
+                    command.errorMessage + ", message:" + it.localizedMessage
                 )
             }, finishAction = {
                 isBuildRunnerSuccess = false
@@ -786,9 +848,9 @@ object Utils {
     }
 
     fun execCommand(
-            project: Project, dirPath: String?, command: Command,
-            successAction: (() -> Unit)? = null,
-            failAction: (() -> Unit)? = null
+        project: Project, dirPath: String?, command: Command,
+        successAction: (() -> Unit)? = null,
+        failAction: (() -> Unit)? = null
     ) {
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands")
         if (toolWindow != null) {
@@ -811,27 +873,27 @@ object Utils {
                     val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
                     var lineStr: String?
                     while (bufferedInputReader.readLine().also {
-                                lineStr = it
-                            } != null) {
+                            lineStr = it
+                        } != null) {
                         log(jTextArea, verticalBar, lineStr)
                     }
                     while (bufferedErrorReader.readLine().also {
-                                lineStr = it
-                            } != null) {
+                            lineStr = it
+                        } != null) {
                         log(jTextArea, verticalBar, lineStr)
                     }
                     val code = process.waitFor()
                     if (code == 0) {
                         isBuildRunnerSuccess = true
                         log(
-                                jTextArea, verticalBar,
-                                "$commandName Success! Exit with code: $code"
+                            jTextArea, verticalBar,
+                            "$commandName Success! Exit with code: $code"
                         )
                     } else {
                         isBuildRunnerSuccess = false
                         log(
-                                jTextArea, verticalBar,
-                                "$commandName Error! Exit with code: $code"
+                            jTextArea, verticalBar,
+                            "$commandName Error! Exit with code: $code"
                         )
                     }
                 } catch (e: Throwable) {
@@ -850,7 +912,7 @@ object Utils {
             }, failAction = {
                 failAction?.invoke()
                 showErrorMessage(
-                        command.errorMessage + ", message:" + it.localizedMessage
+                    command.errorMessage + ", message:" + it.localizedMessage
                 )
             }, finishAction = {
                 isBuildRunnerSuccess = false
@@ -860,9 +922,9 @@ object Utils {
 
 
     fun gitTag(
-            project: Project, command: Array<String>,
-            successAction: (() -> Unit)? = null,
-            failAction: (() -> Unit)? = null
+        project: Project, command: Array<String>,
+        successAction: (() -> Unit)? = null,
+        failAction: (() -> Unit)? = null
     ) {
         val toolWindow = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands")
         if (toolWindow != null) {
@@ -872,65 +934,65 @@ object Utils {
             val jTextArea = jScrollPane.viewport.getComponent(0) as JTextArea
             val commandName = "Git Tag"
             project.asyncTask(commandName,
-                    runAction = {
+                runAction = {
+                    log(
+                        jTextArea,
+                        verticalBar,
+                        project.basePath + ": " + getCommand(command)
+                    )
+                    val process = Runtime.getRuntime().exec(command, null, File(project.basePath))
+                    val bufferedErrorStream = BufferedInputStream(process.errorStream)
+                    val bufferedInputStream = BufferedInputStream(process.inputStream)
+                    val bufferedErrorReader = BufferedReader(InputStreamReader(bufferedErrorStream, "utf-8"))
+                    val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
+                    var lineStr: String?
+                    while (bufferedInputReader.readLine().also {
+                            lineStr = it
+                        } != null) {
+                        log(jTextArea, verticalBar, lineStr)
+                    }
+                    while (bufferedErrorReader.readLine().also {
+                            lineStr = it
+                        } != null) {
+                        log(jTextArea, verticalBar, lineStr)
+                    }
+                    val code = process.waitFor()
+                    if (code == 0) {
+                        isBuildRunnerSuccess = true
                         log(
-                                jTextArea,
-                                verticalBar,
-                                project.basePath + ": " + getCommand(command)
+                            jTextArea, verticalBar,
+                            "$commandName Success! Exit with code: $code"
                         )
-                        val process = Runtime.getRuntime().exec(command, null, File(project.basePath))
-                        val bufferedErrorStream = BufferedInputStream(process.errorStream)
-                        val bufferedInputStream = BufferedInputStream(process.inputStream)
-                        val bufferedErrorReader = BufferedReader(InputStreamReader(bufferedErrorStream, "utf-8"))
-                        val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
-                        var lineStr: String?
-                        while (bufferedInputReader.readLine().also {
-                                    lineStr = it
-                                } != null) {
-                            log(jTextArea, verticalBar, lineStr)
-                        }
-                        while (bufferedErrorReader.readLine().also {
-                                    lineStr = it
-                                } != null) {
-                            log(jTextArea, verticalBar, lineStr)
-                        }
-                        val code = process.waitFor()
-                        if (code == 0) {
-                            isBuildRunnerSuccess = true
-                            log(
-                                    jTextArea, verticalBar,
-                                    "$commandName Success! Exit with code: $code"
-                            )
-                        } else {
-                            isBuildRunnerSuccess = false
-                            log(
-                                    jTextArea, verticalBar,
-                                    "$commandName Error! Exit with code: $code"
-                            )
-                        }
-                        bufferedErrorStream.close()
-                        bufferedInputStream.close()
-                        bufferedErrorReader.close()
-                        bufferedInputReader.close()
-                    },
-                    successAction = {
-                        successAction?.invoke()
-                        if (!isBuildRunnerSuccess) {
-                            showErrorMessage(command.toString() + "failed, see logs at CommonCommands window.")
-                        }
-                    }, failAction = {
-                failAction?.invoke()
-                showErrorMessage(command.toString() + ", message:" + it.localizedMessage)
-            }, finishAction = {
+                    } else {
+                        isBuildRunnerSuccess = false
+                        log(
+                            jTextArea, verticalBar,
+                            "$commandName Error! Exit with code: $code"
+                        )
+                    }
+                    bufferedErrorStream.close()
+                    bufferedInputStream.close()
+                    bufferedErrorReader.close()
+                    bufferedInputReader.close()
+                },
+                successAction = {
+                    successAction?.invoke()
+                    if (!isBuildRunnerSuccess) {
+                        showErrorMessage(command.toString() + "failed, see logs at CommonCommands window.")
+                    }
+                }, failAction = {
+                    failAction?.invoke()
+                    showErrorMessage(command.toString() + ", message:" + it.localizedMessage)
+                }, finishAction = {
 
-            })
+                })
         }
     }
 
     fun pushTag(
-            project: Project, command: String,
-            successAction: (() -> Unit)? = null,
-            failAction: (() -> Unit)? = null
+        project: Project, command: String,
+        successAction: (() -> Unit)? = null,
+        failAction: (() -> Unit)? = null
     ) {
         val toolWindow: ToolWindow? = ToolWindowManager.getInstance(project).getToolWindow("CommonCommands")
         toolWindow?.let {
@@ -940,69 +1002,69 @@ object Utils {
             val jTextArea = jScrollPane.viewport.getComponent(0) as JTextArea
             val commandName = "Git Push Tag"
             project.asyncTask(commandName,
-                    runAction = {
-                        log(jTextArea, verticalBar, project.basePath + ": " + command)
-                        val process = Runtime.getRuntime().exec(command, null, File(project.basePath))
-                        val bufferedErrorStream = BufferedInputStream(process.errorStream)
-                        val bufferedInputStream = BufferedInputStream(process.inputStream)
-                        val bufferedErrorReader = BufferedReader(InputStreamReader(bufferedErrorStream, "utf-8"))
-                        val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
-                        var lineStr: String?
-                        while (bufferedInputReader.readLine().also {
-                                    lineStr = it
-                                } != null) {
-                            log(jTextArea, verticalBar, lineStr)
-                        }
-                        while (bufferedErrorReader.readLine().also {
-                                    lineStr = it
-                                } != null) {
-                            log(jTextArea, verticalBar, lineStr)
-                        }
-                        val code = process.waitFor()
-                        if (code == 0) {
-                            isBuildRunnerSuccess = true
-                            log(
-                                    jTextArea, verticalBar,
-                                    "$commandName Success! Exit with code: $code"
-                            )
-                        } else {
-                            isBuildRunnerSuccess = false
-                            log(
-                                    jTextArea, verticalBar,
-                                    "$commandName Error! Exit with code: $code"
-                            )
-                        }
-                        bufferedErrorStream.close()
-                        bufferedInputStream.close()
-                        bufferedErrorReader.close()
-                        bufferedInputReader.close()
-                    }, successAction = {
-                if (isBuildRunnerSuccess) {
-                    successAction?.invoke()
-                    showInfo("Complete!\nRunning $command successfully.")
-                } else {
+                runAction = {
+                    log(jTextArea, verticalBar, project.basePath + ": " + command)
+                    val process = Runtime.getRuntime().exec(command, null, File(project.basePath))
+                    val bufferedErrorStream = BufferedInputStream(process.errorStream)
+                    val bufferedInputStream = BufferedInputStream(process.inputStream)
+                    val bufferedErrorReader = BufferedReader(InputStreamReader(bufferedErrorStream, "utf-8"))
+                    val bufferedInputReader = BufferedReader(InputStreamReader(bufferedInputStream, "utf-8"))
+                    var lineStr: String?
+                    while (bufferedInputReader.readLine().also {
+                            lineStr = it
+                        } != null) {
+                        log(jTextArea, verticalBar, lineStr)
+                    }
+                    while (bufferedErrorReader.readLine().also {
+                            lineStr = it
+                        } != null) {
+                        log(jTextArea, verticalBar, lineStr)
+                    }
+                    val code = process.waitFor()
+                    if (code == 0) {
+                        isBuildRunnerSuccess = true
+                        log(
+                            jTextArea, verticalBar,
+                            "$commandName Success! Exit with code: $code"
+                        )
+                    } else {
+                        isBuildRunnerSuccess = false
+                        log(
+                            jTextArea, verticalBar,
+                            "$commandName Error! Exit with code: $code"
+                        )
+                    }
+                    bufferedErrorStream.close()
+                    bufferedInputStream.close()
+                    bufferedErrorReader.close()
+                    bufferedInputReader.close()
+                }, successAction = {
+                    if (isBuildRunnerSuccess) {
+                        successAction?.invoke()
+                        showInfo("Complete!\nRunning $command successfully.")
+                    } else {
+                        failAction?.invoke()
+                        showErrorMessage("An exception error occurred during command execution. Please manually execute and resolve the error before using this plugin.")
+                    }
+                }, failAction = {
                     failAction?.invoke()
-                    showErrorMessage("An exception error occurred during command execution. Please manually execute and resolve the error before using this plugin.")
-                }
-            }, failAction = {
-                failAction?.invoke()
-                showErrorMessage(command + ", message:" + it.localizedMessage)
-            }, finishAction = {
-                isBuildRunnerSuccess = false
-            })
+                    showErrorMessage(command + ", message:" + it.localizedMessage)
+                }, finishAction = {
+                    isBuildRunnerSuccess = false
+                })
         }
     }
 
     private fun Project.asyncTask(
-            title: String,
-            runAction: (ProgressIndicator) -> Unit,
-            successAction: (() -> Unit)? = null,
-            failAction: ((Throwable) -> Unit)? = null,
-            finishAction: (() -> Unit)? = null
+        title: String,
+        runAction: (ProgressIndicator) -> Unit,
+        successAction: (() -> Unit)? = null,
+        failAction: ((Throwable) -> Unit)? = null,
+        finishAction: (() -> Unit)? = null
     ) {
         object : Task.Backgroundable(
-                this, title, true,
-                PerformInBackgroundOption.ALWAYS_BACKGROUND
+            this, title, true,
+            PerformInBackgroundOption.ALWAYS_BACKGROUND
         ) {
             override fun run(p0: ProgressIndicator) {
                 return runAction.invoke(p0)
