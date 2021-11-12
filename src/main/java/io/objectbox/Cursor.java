@@ -238,6 +238,7 @@ public abstract class Cursor<T> implements Closeable {
      * @return key or 0 if not found
      * @deprecated TODO only used in tests, remove in the future
      */
+    @Deprecated
     long lookupKeyUsingIndex(int propertyId, String value) {
         return nativeLookupKeyUsingIndex(cursor, propertyId, value);
     }

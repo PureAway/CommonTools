@@ -31,7 +31,7 @@
 
     <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
-    <idea-version since-build="201.6668.113" until-build="211.7142.45"/>
+    <idea-version since-build="201.6668.113" until-build="212.5457.46"/>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>

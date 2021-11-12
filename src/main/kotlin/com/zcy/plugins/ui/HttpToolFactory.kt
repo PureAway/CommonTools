@@ -3,6 +3,7 @@ package com.zcy.plugins.ui
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 import com.intellij.ide.plugins.newui.VerticalLayout
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
@@ -18,7 +19,6 @@ import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.panels.HorizontalLayout
 import com.intellij.ui.content.ContentFactory
-import com.squareup.okhttp.*
 import com.zcy.plugins.ui.Json2ClassForm.OnGenerateClick
 import com.zcy.plugins.utils.JSONParser4Dart
 import com.zcy.plugins.utils.JSONParser4Java
@@ -29,9 +29,12 @@ import com.zcy.plugins.utils.Utils.showErrorNotification
 import io.objectbox.*
 import io.objectbox.Box
 import net.sf.json.JSONObject
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okio.BufferedSink
 import okio.BufferedSource
 import okio.ByteString
+import okio.ByteString.Companion.encodeUtf8
 import org.apache.http.client.utils.URIBuilder
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants
@@ -268,10 +271,12 @@ class HttpToolFactory : ToolWindowFactory {
         val file = File("$path$fileName.dart")
         if (file.exists()) {
             val f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file)
-            if (f != null) {
-                f.refresh(false, true)
-                FileEditorManager.getInstance(project).openTextEditor(OpenFileDescriptor(project, f), true)
-                FileEditorManager.getInstance(project).openFile(f, true)
+            ApplicationManager.getApplication().runReadAction {
+                if (f != null) {
+                    f.refresh(false, true)
+                    FileEditorManager.getInstance(project).openTextEditor(OpenFileDescriptor(project, f), true)
+                    FileEditorManager.getInstance(project).openFile(f, true)
+                }
             }
         }
     }
@@ -286,13 +291,13 @@ class HttpToolFactory : ToolWindowFactory {
         parser.setGenSetter(true)
         val dist = JSONObject.fromObject(resultJson)
         val resultName = parser.decodeJSONObject(dist)
-        Messages.showInfoMessage(project, "Generating success!", "Success")
         val file = File(path, "$resultName.java")
         if (file.exists()) {
-            SwingUtilities.invokeLater {
-                val f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file)
+            val f = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(file)
+            ApplicationManager.getApplication().runReadAction {
                 if (f != null) {
                     f.refresh(false, true)
+                    Messages.showInfoMessage(project, "Generating success!", "Success")
                     FileEditorManager.getInstance(project).openTextEditor(OpenFileDescriptor(project, f), true)
                 }
             }
@@ -357,8 +362,8 @@ class HttpToolFactory : ToolWindowFactory {
             var body: RequestBody? = null
             if (methodBox.selectedItem.toString().equals("POST", ignoreCase = true)) {
                 body = object : RequestBody() {
-                    override fun contentType(): MediaType {
-                        return MediaType.parse(contentTypeBox.selectedItem.toString())
+                    override fun contentType(): MediaType? {
+                        return contentTypeBox.selectedItem.toString().toMediaTypeOrNull()
                     }
 
                     override fun contentLength(): Long {
@@ -367,7 +372,7 @@ class HttpToolFactory : ToolWindowFactory {
 
                     @Throws(IOException::class)
                     override fun writeTo(sink: BufferedSink) {
-                        sink.write(ByteString.encodeUtf8(requestText.text))
+                        sink.write(requestText.text.encodeUtf8())
                     }
                 }
             }
@@ -393,17 +398,18 @@ class HttpToolFactory : ToolWindowFactory {
             }
             val request = rb.build()
             client.newCall(request).enqueue(object : Callback {
-                override fun onFailure(request: Request, e: IOException) {
+
+                override fun onFailure(call: Call, e: IOException) {
                     println("Error in request")
                     println(e.message)
                     showErrorNotification(project, "request error occurred!")
                 }
 
-                override fun onResponse(response: Response) {
-                    val responseCode = response.code()
-                    val responseHeaders = response.headers()
+                override fun onResponse(call: Call, response: Response) {
+                    val responseCode = response.code
+                    val responseHeaders = response.headers
                     code.text = responseCode.toString()
-                    if (response.body() != null) {
+                    if (response.body != null) {
                         if (responseCode == HttpURLConnection.HTTP_OK) {
                             convertButton.isVisible = true
                             val requestHistory = RequestHistory()
@@ -424,14 +430,13 @@ class HttpToolFactory : ToolWindowFactory {
                         }
                         try {
                             SwingUtilities.invokeAndWait {
-                                for (i in 0 until responseHeaders.size()) {
+                                for (i in 0 until responseHeaders.size) {
                                     bodyText.syntaxEditingStyle =
-                                        response.body().contentType().type() + "/" + response.body().contentType()
-                                            .subtype()
-                                    val responseBody = response.body()
+                                        response.body?.contentType()?.type + "/" + response.body?.contentType()?.subtype
+                                    val responseBody = response.body
                                     var source: BufferedSource? = null
                                     try {
-                                        source = responseBody.source()
+                                        source = responseBody?.source()
                                     } catch (e: IOException) {
                                         e.printStackTrace()
                                     }
@@ -442,14 +447,14 @@ class HttpToolFactory : ToolWindowFactory {
                                     }
                                     val buffer = source!!.buffer()
                                     var charset = StandardCharsets.UTF_8
-                                    val contentType = responseBody.contentType()
+                                    val contentType = responseBody?.contentType()
                                     if (contentType != null) {
                                         charset = contentType.charset(StandardCharsets.UTF_8)
                                     }
                                     var s = buffer.clone().readString(charset)
                                     try {
                                         bodyText.text = s
-                                        if (response.body().contentType().subtype().equals("json", ignoreCase = true)) {
+                                        if (response.body?.contentType()?.subtype.equals("json", ignoreCase = true)) {
                                             val parser = JsonParser()
                                             val el = parser.parse(s)
                                             val gson =
@@ -459,11 +464,11 @@ class HttpToolFactory : ToolWindowFactory {
                                             bodyText.text = s
                                             bodyText.syntaxEditingStyle = SyntaxConstants.SYNTAX_STYLE_JSON
                                             resultJson = s
-                                        } else if (response.body().contentType().subtype()
+                                        } else if (response.body?.contentType()?.subtype
                                                 .equals("xml", ignoreCase = true)
-                                            || response.body().contentType().subtype()
+                                            || response.body?.contentType()?.subtype
                                                 .equals("rss+xml", ignoreCase = true)
-                                            || response.body().contentType().subtype().equals("smil", ignoreCase = true)
+                                            || response.body?.contentType()?.subtype.equals("smil", ignoreCase = true)
                                         ) {
                                             val xmlInput: Source = StreamSource(StringReader(s))
                                             val stringWriter = StringWriter()

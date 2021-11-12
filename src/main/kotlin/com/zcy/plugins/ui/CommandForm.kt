@@ -1,20 +1,18 @@
 package com.zcy.plugins.ui
 
+import com.intellij.ide.plugins.newui.HorizontalLayout
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
-import com.intellij.ui.components.panels.HorizontalLayout
 import com.zcy.plugins.checker.ProjectChecker
 import com.zcy.plugins.model.Command
 import com.zcy.plugins.model.KillCommand
 import com.zcy.plugins.sdk.FlutterSdk
 import com.zcy.plugins.utils.Utils
 import org.jdesktop.swingx.VerticalLayout
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Toolkit
+import java.awt.*
 import java.awt.datatransfer.StringSelection
 import java.awt.datatransfer.Transferable
 import java.util.*
@@ -65,8 +63,8 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         if (isFlutter) {
             path = flutterPath
             flutterKillCommand = KillCommand(
-                    "Flutter",
-                    "flutter", "commandline name='flutter'"
+                "Flutter",
+                "flutter", "commandline name='flutter'"
             )
         }
         isSYN = checker.checkPostGet(project.basePath)
@@ -75,7 +73,7 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         }
         flutterSdk?.let {
             flutterSdkPath =
-                    flutterSdk.homePath + if (Utils.isWindowsOS) "/bin/flutter.bat" else "/bin/flutter"
+                flutterSdk.homePath + if (Utils.isWindowsOS) "/bin/flutter.bat" else "/bin/flutter"
             log.info("find flutter home : $flutterSdkPath")
         }
         initData()
@@ -135,7 +133,7 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         content!!.revalidate()
     }
 
-    private fun getTitleWithKillFlutterCommand(): JPanel? {
+    private fun getTitleWithKillFlutterCommand(): JPanel {
         val item = JPanel()
         item.layout = HorizontalLayout(-60)
         val jbLabel = JBLabel("Flutter")
@@ -145,8 +143,7 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         item.add(jbLabel)
         val killIcon = ImageIcon(javaClass.getResource("/icons/flutter.png"))
         val killButton = JButton()
-        killButton.setSize(48, 30)
-        killButton.preferredSize = Dimension(48, 30)
+        killButton.preferredSize = Dimension(48, 36)
         killButton.icon = killIcon
         killButton.toolTipText = "点击杀死flutter进程"
         killButton.addActionListener {
@@ -182,11 +179,11 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         item.add(name)
         val function = JPanel()
         function.layout = HorizontalLayout(10)
-        function.preferredSize = Dimension(120, 32)
+        function.preferredSize = Dimension(120, 40)
         item.add(function)
         val copyIcon = ImageIcon(javaClass.getResource("/icons/copy.png"))
         val copyButton = JButton()
-        copyButton.preferredSize = Dimension(48, 30)
+        copyButton.preferredSize = Dimension(48, 40)
         copyButton.icon = copyIcon
         copyButton.toolTipText = "点击将会copy命令：" + command.cmd
         copyButton.addActionListener {
@@ -198,13 +195,14 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
         }
         function.add(copyButton)
         if (command.cmd.startsWith("delete")
-                || command.name.startsWith("git")
-                || command.cmd.startsWith("generate")) {
+            || command.name.startsWith("git")
+            || command.cmd.startsWith("generate")
+        ) {
             copyButton.isVisible = false
         }
         val execIcon = ImageIcon(javaClass.getResource("/icons/run.png"))
         val execButton = JButton()
-        execButton.preferredSize = Dimension(48, 30)
+        execButton.preferredSize = Dimension(48, 40)
         execButton.icon = execIcon
         execButton.toolTipText = "点击将会执行命令：" + command.cmd
         execButton.addActionListener {
@@ -212,7 +210,7 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
                 command.name == "images_path_generator" -> {
                     Utils.generateImagesPath(path)
                 }
-                command.name == "export_path_generator" ->{
+                command.name == "export_path_generator" -> {
                     Utils.generateExportPath(path)
                 }
                 command.name == "one key exec" -> {
@@ -252,100 +250,106 @@ class CommandForm(private val project: Project, private var path: String?) : JFr
     private fun initData() {
         if (isFlutter) {
             flutterDataList.add(
-                    Command(
-                            "flutter clean",
-                            arrayOf(flutterSdkPath, "clean"), "flutter clean"
-                    )
+                Command(
+                    "flutter clean",
+                    arrayOf(flutterSdkPath, "clean"), "flutter clean"
+                )
             )
             flutterDataList.add(
-                    Command(
-                            "flutter pub get",
-                            arrayOf(flutterSdkPath, "pub", "get"), "flutter pub get"
-                    )
+                Command(
+                    "flutter pub get",
+                    arrayOf(flutterSdkPath, "pub", "get"), "flutter pub get"
+                )
             )
             flutterDataList.add(
-                    Command(
-                            "delete lock file",
-                            arrayOf("delete lock file"), "delete lock file"
-                    )
+                Command(
+                    "flutter pub outdated",
+                    arrayOf(flutterSdkPath, "pub", "outdated"), "flutter pub outdated"
+                )
             )
             flutterDataList.add(
-                    Command(
-                            "one key exec",
-                            arrayOf(flutterSdkPath),
-                            "delete lock file, then exec flutter clean、flutter pub get"
-                    )
+                Command(
+                    "delete lock file",
+                    arrayOf("delete lock file"), "delete lock file"
+                )
             )
-
             flutterDataList.add(
-                    Command(
-                            "build_runner rebuild",
-                            arrayOf(flutterSdkPath, "pub", "run", "build_runner", "build", "--delete-conflicting-output"),
-                            "flutter pub run build_runner build --delete-conflicting-outputs"
-                    )
+                Command(
+                    "one key exec",
+                    arrayOf(flutterSdkPath),
+                    "delete lock file, then exec flutter clean、flutter pub get"
+                )
             )
 
             flutterDataList.add(
-                    Command(
-                            "images_path_generator",
-                            arrayOf("generate images path at pubspec.yaml file"),
-                            "generate images path at pubspec.yaml file"
-                    )
+                Command(
+                    "build_runner rebuild",
+                    arrayOf(flutterSdkPath, "pub", "run", "build_runner", "build", "--delete-conflicting-output"),
+                    "flutter pub run build_runner build --delete-conflicting-outputs"
+                )
             )
 
             flutterDataList.add(
-                    Command(
-                            "export_path_generator",
-                            arrayOf("generate export path at library file"),
-                            "generate export path at library file"
-                    )
+                Command(
+                    "images_path_generator",
+                    arrayOf("generate images path at pubspec.yaml file"),
+                    "generate images path at pubspec.yaml file"
+                )
+            )
+
+            flutterDataList.add(
+                Command(
+                    "export_path_generator",
+                    arrayOf("generate export path at library file"),
+                    "generate export path at library file"
+                )
             )
         }
         if (isGit) {
             gitDataList.add(
-                    Command(
-                            "git tag",
-                            arrayOf("git", "tag"),
-                            "git tag"
-                    )
+                Command(
+                    "git tag",
+                    arrayOf("git", "tag"),
+                    "git tag"
+                )
             )
         }
         if (!Utils.isWindowsOS && isSYN) {
             postGetDataList.add(
-                    Command(
-                            "postget.sh",
-                            arrayOf("./postget.sh"),
-                            "./postget.sh"
-                    )
+                Command(
+                    "postget.sh",
+                    arrayOf("./postget.sh"),
+                    "./postget.sh"
+                )
             )
         }
         adbDataList.add(
-                Command(
-                        "adb logcat",
-                        arrayOf("adb", "logcat", "-v", "time", ">", "log.txt"),
-                        "adb logcat -v time > log.txt"
-                )
+            Command(
+                "adb logcat",
+                arrayOf("adb", "logcat", "-v", "time", ">", "log.txt"),
+                "adb logcat -v time > log.txt"
+            )
         )
         adbDataList.add(
-                Command(
-                        "adb devices",
-                        arrayOf("adb", "devices"),
-                        "adb devices"
-                )
+            Command(
+                "adb devices",
+                arrayOf("adb", "devices"),
+                "adb devices"
+            )
         )
         adbDataList.add(
-                Command(
-                        "adb kill-server",
-                        arrayOf("adb", "kill-server"),
-                        "adb kill-server"
-                )
+            Command(
+                "adb kill-server",
+                arrayOf("adb", "kill-server"),
+                "adb kill-server"
+            )
         )
         adbDataList.add(
-                Command(
-                        "adb start-server",
-                        arrayOf("adb", "start-server"),
-                        "adb start-server"
-                )
+            Command(
+                "adb start-server",
+                arrayOf("adb", "start-server"),
+                "adb start-server"
+            )
         )
     }
 }

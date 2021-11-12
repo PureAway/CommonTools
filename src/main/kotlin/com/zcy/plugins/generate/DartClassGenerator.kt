@@ -15,17 +15,15 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.SmartPointerManager
 import com.intellij.util.IncorrectOperationException
 import com.zcy.plugins.utils.Utils
-import sun.swing.SwingUtilities2
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.io.IOException
 import java.util.*
-import javax.swing.SwingUtilities
 
 class DartClassGenerator(private val project: Project, private val directory: PsiDirectory) {
     private var psiFile: PsiFile? = null
     fun append(s: String) {
-        ApplicationManager.getApplication().invokeLater {
+        ApplicationManager.getApplication().runWriteAction {
             object : WriteCommandAction<Any?>(project) {
                 override fun run(p0: Result<Any?>) {
                     val path = psiFile!!.virtualFile.path

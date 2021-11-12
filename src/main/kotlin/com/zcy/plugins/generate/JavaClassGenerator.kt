@@ -19,7 +19,7 @@ class JavaClassGenerator(project: Project, dir: PsiDirectory) {
     private var genGetter = false
     private var genSetter = false
     fun append(s: String, clsName: String) {
-        ApplicationManager.getApplication().invokeLater {
+        ApplicationManager.getApplication().runWriteAction{
             object : WriteCommandAction<Any?>(project) {
                 override fun run(p0: Result<Any?>) {
                     val dist: PsiClass? = dataSet[clsName]
