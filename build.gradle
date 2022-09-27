@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'com.zcy.plugins'
-version '1.1.0'
+version '1.2.0'
 
 repositories {
     mavenCentral()
@@ -41,8 +41,16 @@ intellij {
 
 patchPluginXml {
     sinceBuild = '201.6668.113'
-    untilBuild = '212.5457.46'
+    untilBuild = '213.7172.25'
     changeNotes = """
+    <h2>1.2.0</h2>
+    <ul>
+      <li>support unitl build version 213.7172.25</li>
+    </ul>
+    <h2>1.1.1</h2>
+    <ul>
+      <li>support unitl build version 212.5712.43</li>
+    </ul>
     <h2>1.1.0</h2>
     <ul>
       <li>added the flutter pub outdated command</li>
